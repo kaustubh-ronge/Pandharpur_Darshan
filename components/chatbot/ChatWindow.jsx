@@ -1,5 +1,368 @@
-'use client';
+// 'use client';
 
+// import { isToolUIPart, getToolName } from 'ai';
+// import { Send, Bot, User, X, RotateCw, PanelLeftOpen, Loader2, Sparkles, Database, Star, MapPin } from 'lucide-react';
+// import { Button } from '@/components/ui/button';
+// import { Input } from '@/components/ui/input';
+// import { motion, AnimatePresence } from 'framer-motion';
+// import Link from 'next/link';
+// import LanguageSelection from './LanguageSelection';
+// import { useRef, useEffect } from 'react';
+
+// // ✅ FIX: "Unique key prop" error
+// // Every item returned in the map now has a unique key, including plain text spans.
+// const FormattedText = ({ text }) => {
+//   if (!text) return null;
+
+//   const renderBold = (text) => {
+//     const chunks = text.split(/(\*\*.*?\*\*)/g);
+//     return chunks.map((chunk, i) =>
+//       chunk.startsWith('**') && chunk.endsWith('**') ? (
+//         <strong key={i} className="font-bold text-orange-950">
+//           {chunk.slice(2, -2)}
+//         </strong>
+//       ) : (
+//         chunk
+//       )
+//     );
+//   };
+
+//   return (
+//     <div className="space-y-2">
+//       {text.split('\n').map((line, i) => {
+//         if (line.trim().startsWith('* ')) {
+//           return (
+//             <li key={i} className="ml-5 list-disc marker:text-orange-500 pl-1 text-[14.5px] leading-relaxed">
+//               {renderBold(line.replace(/^\* /, ''))}
+//             </li>
+//           );
+//         }
+//         if (line.trim().startsWith('- ')) {
+//           return (
+//             <li key={i} className="ml-5 list-disc marker:text-orange-500 pl-1 text-[14.5px] leading-relaxed">
+//               {renderBold(line.replace(/^- /, ''))}
+//             </li>
+//           );
+//         }
+//         return (
+//           <p key={i} className="min-h-[1rem] text-[14.5px] leading-relaxed">
+//             {renderBold(line)}
+//           </p>
+//         );
+//       })}
+//     </div>
+//   );
+// };
+
+// // --- Generative UI: Beautiful Tool Result Renderer ---
+// function ToolResultRenderer({ part }) {
+//   const isDone = part.state === 'output-available' || part.state === 'output-error';
+//   const toolName = part.toolName || (typeof getToolName !== 'undefined' ? getToolName(part) : 'unknown');
+
+//   if (!isDone) {
+//     let icon = <Loader2 className="w-4 h-4 animate-spin text-orange-600" />;
+//     let label = "Thinking...";
+//     if (toolName === 'getHotels') { icon = <Database className="w-4 h-4 animate-pulse text-orange-500" />; label = "Finding best hotels..."; }
+//     if (toolName === 'getTemples') { icon = <Star className="w-4 h-4 animate-pulse text-yellow-500" />; label = "Finding temples..."; }
+//     if (toolName === 'getRestaurants') { icon = <Database className="w-4 h-4 animate-pulse text-red-500" />; label = "Finding restaurants..."; }
+//     if (toolName === 'getBhaktaniwas') { icon = <MapPin className="w-4 h-4 animate-pulse text-emerald-500" />; label = "Finding dharamshalas..."; }
+
+//     return (
+//       <motion.div
+//         initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
+//         className="flex items-center gap-2 px-3 py-2 bg-orange-50/80 border border-orange-100 rounded-lg shadow-sm w-fit my-1.5"
+//       >
+//         {icon}
+//         <span className="text-xs font-semibold text-orange-700 tracking-wide">{label}</span>
+//       </motion.div>
+//     );
+//   }
+
+//   if (part.state === 'output-error') return null;
+
+//   const result = part.result;
+//   if (!result || !result.results || result.results.length === 0) return null;
+
+//   return (
+//     <div className="w-[300px] sm:w-[360px] overflow-x-auto pb-4 pt-2 -mx-2 px-2 flex gap-4 snap-x scrollbar-thin scrollbar-thumb-orange-200">
+//       <AnimatePresence>
+//         {result.results.map((item, idx) => {
+//           const itemUrl = item.url || (item.category === 'temples' ? `/temples/${item.slug}` : `/pandharpur-bookings/${item.category}/${item.slug}`);
+
+//           return (
+//             <motion.div
+//               key={item.slug || idx}
+//               initial={{ opacity: 0, scale: 0.9, x: 20 }}
+//               animate={{ opacity: 1, scale: 1, x: 0 }}
+//               transition={{ delay: idx * 0.1, type: "spring", bounce: 0.4 }}
+//               className="min-w-[240px] snap-start bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative overflow-hidden group"
+//             >
+//               {/* Image Header */}
+//               <div className="w-full h-32 relative bg-gray-100 overflow-hidden">
+//                 {item.image ? (
+//                   <img
+//                     src={item.image}
+//                     alt={item.name}
+//                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+//                   />
+//                 ) : (
+//                   <div className="w-full h-full flex items-center justify-center bg-orange-50 text-orange-200">
+//                     <Database className="w-8 h-8" />
+//                   </div>
+//                 )}
+//                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+
+//                 {/* Floating Badges */}
+//                 {item.price && (
+//                   <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-md px-2 py-1 rounded-md shadow-sm">
+//                     <span className="text-[10px] font-bold text-orange-700 uppercase tracking-wider">{item.price}</span>
+//                   </div>
+//                 )}
+//                 {item.cuisine && (
+//                   <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-full flex items-center gap-1">
+//                     <Star className="w-3 h-3 text-amber-400" />
+//                     <span className="text-[10px] font-semibold text-white">{item.cuisine}</span>
+//                   </div>
+//                 )}
+//               </div>
+
+//               {/* Content Body */}
+//               <div className="p-3 flex flex-col flex-1 bg-gradient-to-b from-white to-orange-50/30">
+//                 <h4 className="font-bold text-gray-800 text-[15px] leading-tight line-clamp-1 group-hover:text-orange-600 transition-colors">{item.name}</h4>
+
+//                 {item.address && (
+//                   <p className="text-[11px] font-medium text-gray-500 line-clamp-1 mt-1.5 flex items-center">
+//                     <MapPin className="w-3 h-3 inline mr-1 text-orange-400 flex-shrink-0" />
+//                     <span className="truncate">{item.address}</span>
+//                   </p>
+//                 )}
+
+//                 <div className="mt-4 pt-3 border-t border-orange-100/50">
+//                   <Link href={itemUrl} target="_blank">
+//                     <Button size="sm" variant="outline" className="w-full border-orange-200 text-orange-700 bg-white hover:bg-orange-600 hover:text-white transition-all h-8 text-xs font-bold rounded-xl shadow-sm">
+//                       View Details
+//                     </Button>
+//                   </Link>
+//                 </div>
+//               </div>
+//             </motion.div>
+//           );
+//         })}
+//       </AnimatePresence>
+//     </div>
+//   );
+// }
+
+// // --- DATA: Suggested Questions ---
+// const SUGGESTIONS = {
+//   english: ["Darshan Timings", "Best Hotels", "History of Pandharpur", "How to reach?"],
+//   marathi: ["दर्शन वेळा", "उत्तम हॉटेल्स", "पंढरपूरचा इतिहास", "कसे पोहोचायचे?"],
+//   hindi: ["दर्शन का समय", "अच्छे होटल", "पंढरपुर का इतिहास", "कैसे पहुंचें?"]
+// };
+
+// export default function ChatWindow({
+//   messages,
+//   input,
+//   setInput,
+//   onSendMessage,
+//   isLoading,
+//   isInitializing,
+//   language,
+//   onLanguageSelect,
+//   isSidebarOpen,
+//   setIsSidebarOpen,
+//   onNewChat,
+//   onClose
+// }) {
+//   const scrollAreaRef = useRef(null);
+
+//   // Auto-scroll
+//   useEffect(() => {
+//     if (scrollAreaRef.current) {
+//       scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+//     }
+//   }, [messages, isLoading, isInitializing]);
+
+//   const handleSuggestionClick = (text) => {
+//     onSendMessage(null, text);
+//   };
+
+//   return (
+//     <div className="flex-1 flex flex-col h-full w-full relative bg-white">
+
+//       {/* --- HEADER --- */}
+//       <div className="px-4 py-3 bg-white border-b border-gray-100 flex items-center justify-between shadow-sm z-10">
+//         <div className="flex items-center gap-3">
+//           <Button
+//             variant="ghost"
+//             size="icon"
+//             className="text-gray-500 hover:bg-gray-100"
+//             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+//             title="Toggle Sidebar"
+//           >
+//             <PanelLeftOpen className="h-5 w-5" />
+//           </Button>
+
+//           <div className="flex items-center gap-2">
+//             <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+//               <Bot className="h-5 w-5 text-orange-600" />
+//             </div>
+//             <div>
+//               <h3 className="font-bold text-gray-800 text-sm leading-tight">Pandhari Mitra</h3>
+//               <p className="text-[10px] text-green-600 font-medium flex items-center gap-1">
+//                 <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Online
+//               </p>
+//             </div>
+//           </div>
+//         </div>
+
+//         <div className="flex gap-1">
+//           <Button variant="ghost" size="icon" onClick={onNewChat} title="New Chat">
+//             <RotateCw className="h-4 w-4 text-gray-400 hover:text-orange-600" />
+//           </Button>
+//           <Button variant="ghost" size="icon" onClick={onClose} title="Close">
+//             <X className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+//           </Button>
+//         </div>
+//       </div>
+
+//       {/* --- CHAT AREA --- */}
+//       <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-4 bg-slate-50/50">
+//         {isInitializing ? (
+//           <div className="flex h-full flex-col items-center justify-center text-gray-400 gap-3">
+//             <Loader2 className="h-8 w-8 animate-spin text-orange-400" />
+//             <p className="text-xs">Starting new conversation...</p>
+//           </div>
+//         ) : !language ? (
+//           <LanguageSelection onSelect={onLanguageSelect} />
+//         ) : (
+//           <div className="flex flex-col gap-6 pb-2">
+//             {messages.map((msg) => (
+//               <motion.div
+//                 key={msg.id}
+//                 initial={{ opacity: 0, y: 10 }}
+//                 animate={{ opacity: 1, y: 0 }}
+//                 className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+//               >
+//                 {msg.role === 'model' && (
+//                   <div className="w-8 h-8 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center flex-shrink-0 mt-1">
+//                     <Bot className="h-5 w-5 text-orange-600" />
+//                   </div>
+//                 )}
+//                 <div className={`max-w-[85%] sm:max-w-[75%] flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+//                   {/* Text Message Bubble */}
+//                   {(() => {
+//                     let textToRender = msg.content || '';
+//                     if (msg.parts) {
+//                       textToRender = msg.parts.filter(p => p.type === 'text').map(p => p.text).join('');
+//                     }
+
+//                     if (!textToRender.trim() && !msg.isError) return null; // Hide empty bubbles if only tools exist
+
+//                     return (
+//                       <div className={`px-5 py-3 rounded-2xl text-sm shadow-sm leading-relaxed ${msg.role === 'user'
+//                           ? 'bg-orange-600 text-white rounded-br-none'
+//                           : 'bg-white text-gray-800 rounded-bl-none border border-gray-100'
+//                         }`}>
+//                         {msg.isError ? (
+//                           <span className="text-red-500">{textToRender}</span>
+//                         ) : (
+//                           <FormattedText text={textToRender} />
+//                         )}
+//                       </div>
+//                     );
+//                   })()}
+
+//                   {/* Generative UI Tool Results */}
+//                   {(msg.role === 'assistant' || msg.role === 'model') && (
+//                     <div className="mt-1">
+//                       {/* Format 1: msg.toolInvocations (Standard AI SDK v3+) */}
+//                       {msg.toolInvocations?.map((toolInv, i) => (
+//                         <ToolResultRenderer key={`inv-${i}`} part={{ ...toolInv, state: toolInv.state === 'result' ? 'output-available' : 'partial-call', toolName: toolInv.toolName }} />
+//                       ))}
+
+//                       {/* Format 2: msg.parts (Experimental/Alpha AI SDK) */}
+//                       {msg.parts?.filter(p => p.type === 'tool-invocation' || (typeof isToolUIPart !== 'undefined' && isToolUIPart(p))).map((part, i) => {
+//                         const actualPart = part.toolInvocation ? part.toolInvocation : part;
+//                         return <ToolResultRenderer key={`part-${i}`} part={{ ...actualPart, state: actualPart.state === 'result' ? 'output-available' : actualPart.state, toolName: actualPart.toolName }} />;
+//                       })}
+//                     </div>
+//                   )}
+
+//                   <span className="text-[10px] text-gray-400 mt-1.5 px-1 font-medium">
+//                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+//                   </span>
+//                 </div>
+//                 {msg.role === 'user' && (
+//                   <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-1">
+//                     <User className="h-4 w-4 text-blue-600" />
+//                   </div>
+//                 )}
+//               </motion.div>
+//             ))}
+
+//             {messages.length === 1 && !isLoading && SUGGESTIONS[language] && (
+//               <div className="ml-11 mt-2 animate-in fade-in duration-500">
+//                 <p className="text-xs text-gray-400 mb-2 pl-1 font-medium">Suggested questions:</p>
+//                 <div className="flex flex-wrap gap-2">
+//                   {SUGGESTIONS[language].map((s, i) => (
+//                     <button
+//                       key={i}
+//                       onClick={() => handleSuggestionClick(s)}
+//                       className="flex items-center gap-1.5 text-xs font-medium text-orange-700 bg-orange-50 border border-orange-100 hover:bg-orange-100 hover:border-orange-200 hover:scale-105 active:scale-95 transition-all px-3 py-2 rounded-full shadow-sm"
+//                     >
+//                       <Sparkles className="h-3 w-3 text-orange-500" />
+//                       {s}
+//                     </button>
+//                   ))}
+//                 </div>
+//               </div>
+//             )}
+
+//             {isLoading && (
+//               <div className="flex gap-3">
+//                 <div className="w-8 h-8 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center">
+//                   <Bot className="h-5 w-5 text-orange-600" />
+//                 </div>
+//                 <div className="bg-white px-4 py-3 rounded-2xl rounded-bl-none border border-gray-100 shadow-sm flex items-center gap-1">
+//                   <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
+//                   <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-100"></span>
+//                   <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-200"></span>
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         )}
+//       </div>
+
+//       {/* --- INPUT AREA --- */}
+//       {language && (
+//         <div className="p-4 bg-white border-t border-gray-100">
+//           <form onSubmit={onSendMessage} className="flex gap-2 relative items-center">
+//             <Input
+//               value={input || ''}
+//               onChange={(e) => setInput(e.target.value)}
+//               placeholder="Type your message..."
+//               className="pr-12 bg-gray-50 border-gray-200 focus-visible:ring-orange-500 rounded-full h-11 shadow-sm"
+//               disabled={isLoading}
+//             />
+//             <Button
+//               type="submit"
+//               size="icon"
+//               className="rounded-full bg-orange-600 hover:bg-orange-700 text-white absolute right-1.5 h-8 w-8 shadow-md"
+//               disabled={isLoading || !input?.trim()}
+//             >
+//               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+//             </Button>
+//           </form>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+
+'use client';
 import { isToolUIPart, getToolName } from 'ai';
 import { Send, Bot, User, X, RotateCw, PanelLeftOpen, Loader2, Sparkles, Database, Star, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,12 +371,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import LanguageSelection from './LanguageSelection';
 import { useRef, useEffect } from 'react';
-
 // ✅ FIX: "Unique key prop" error
 // Every item returned in the map now has a unique key, including plain text spans.
 const FormattedText = ({ text }) => {
   if (!text) return null;
-
   const renderBold = (text) => {
     const chunks = text.split(/(\*\*.*?\*\*)/g);
     return chunks.map((chunk, i) =>
@@ -26,7 +387,6 @@ const FormattedText = ({ text }) => {
       )
     );
   };
-
   return (
     <div className="space-y-2">
       {text.split('\n').map((line, i) => {
@@ -53,12 +413,11 @@ const FormattedText = ({ text }) => {
     </div>
   );
 };
-
 // --- Generative UI: Beautiful Tool Result Renderer ---
 function ToolResultRenderer({ part }) {
   const isDone = part.state === 'output-available' || part.state === 'output-error';
   const toolName = part.toolName || (typeof getToolName !== 'undefined' ? getToolName(part) : 'unknown');
-  
+
   if (!isDone) {
     let icon = <Loader2 className="w-4 h-4 animate-spin text-orange-600" />;
     let label = "Thinking...";
@@ -66,9 +425,9 @@ function ToolResultRenderer({ part }) {
     if (toolName === 'getTemples') { icon = <Star className="w-4 h-4 animate-pulse text-yellow-500" />; label = "Finding temples..."; }
     if (toolName === 'getRestaurants') { icon = <Database className="w-4 h-4 animate-pulse text-red-500" />; label = "Finding restaurants..."; }
     if (toolName === 'getBhaktaniwas') { icon = <MapPin className="w-4 h-4 animate-pulse text-emerald-500" />; label = "Finding dharamshalas..."; }
-    
+
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-2 px-3 py-2 bg-orange-50/80 border border-orange-100 rounded-lg shadow-sm w-fit my-1.5"
       >
@@ -77,20 +436,17 @@ function ToolResultRenderer({ part }) {
       </motion.div>
     );
   }
-
   if (part.state === 'output-error') return null;
-
   const result = part.result;
   if (!result || !result.results || result.results.length === 0) return null;
-
   return (
     <div className="w-[300px] sm:w-[360px] overflow-x-auto pb-4 pt-2 -mx-2 px-2 flex gap-4 snap-x scrollbar-thin scrollbar-thumb-orange-200">
       <AnimatePresence>
         {result.results.map((item, idx) => {
           const itemUrl = item.url || (item.category === 'temples' ? `/temples/${item.slug}` : `/pandharpur-bookings/${item.category}/${item.slug}`);
-          
+
           return (
-            <motion.div 
+            <motion.div
               key={item.slug || idx}
               initial={{ opacity: 0, scale: 0.9, x: 20 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -100,9 +456,9 @@ function ToolResultRenderer({ part }) {
               {/* Image Header */}
               <div className="w-full h-32 relative bg-gray-100 overflow-hidden">
                 {item.image ? (
-                  <img 
-                    src={item.image} 
-                    alt={item.name} 
+                  <img
+                    src={item.image}
+                    alt={item.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                 ) : (
@@ -111,7 +467,7 @@ function ToolResultRenderer({ part }) {
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                
+
                 {/* Floating Badges */}
                 {item.price && (
                   <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-md px-2 py-1 rounded-md shadow-sm">
@@ -125,18 +481,17 @@ function ToolResultRenderer({ part }) {
                   </div>
                 )}
               </div>
-              
+
               {/* Content Body */}
               <div className="p-3 flex flex-col flex-1 bg-gradient-to-b from-white to-orange-50/30">
                 <h4 className="font-bold text-gray-800 text-[15px] leading-tight line-clamp-1 group-hover:text-orange-600 transition-colors">{item.name}</h4>
-                
+
                 {item.address && (
                   <p className="text-[11px] font-medium text-gray-500 line-clamp-1 mt-1.5 flex items-center">
                     <MapPin className="w-3 h-3 inline mr-1 text-orange-400 flex-shrink-0" />
                     <span className="truncate">{item.address}</span>
                   </p>
                 )}
-
                 <div className="mt-4 pt-3 border-t border-orange-100/50">
                   <Link href={itemUrl} target="_blank">
                     <Button size="sm" variant="outline" className="w-full border-orange-200 text-orange-700 bg-white hover:bg-orange-600 hover:text-white transition-all h-8 text-xs font-bold rounded-xl shadow-sm">
@@ -152,14 +507,12 @@ function ToolResultRenderer({ part }) {
     </div>
   );
 }
-
 // --- DATA: Suggested Questions ---
 const SUGGESTIONS = {
   english: ["Darshan Timings", "Best Hotels", "History of Pandharpur", "How to reach?"],
   marathi: ["दर्शन वेळा", "उत्तम हॉटेल्स", "पंढरपूरचा इतिहास", "कसे पोहोचायचे?"],
   hindi: ["दर्शन का समय", "अच्छे होटल", "पंढरपुर का इतिहास", "कैसे पहुंचें?"]
 };
-
 export default function ChatWindow({
   messages,
   input,
@@ -175,34 +528,31 @@ export default function ChatWindow({
   onClose
 }) {
   const scrollAreaRef = useRef(null);
-
   // Auto-scroll
   useEffect(() => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
     }
   }, [messages, isLoading, isInitializing]);
-
   const handleSuggestionClick = (text) => {
-    onSendMessage(null, text); 
+    onSendMessage(null, text);
   };
-
   return (
     <div className="flex-1 flex flex-col h-full w-full relative bg-white">
-      
+
       {/* --- HEADER --- */}
       <div className="px-4 py-3 bg-white border-b border-gray-100 flex items-center justify-between shadow-sm z-10">
         <div className="flex items-center gap-3">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="text-gray-500 hover:bg-gray-100" 
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-gray-500 hover:bg-gray-100"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             title="Toggle Sidebar"
           >
             <PanelLeftOpen className="h-5 w-5" />
           </Button>
-          
+
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
               <Bot className="h-5 w-5 text-orange-600" />
@@ -215,7 +565,7 @@ export default function ChatWindow({
             </div>
           </div>
         </div>
-        
+
         <div className="flex gap-1">
           <Button variant="ghost" size="icon" onClick={onNewChat} title="New Chat">
             <RotateCw className="h-4 w-4 text-gray-400 hover:text-orange-600" />
@@ -225,7 +575,6 @@ export default function ChatWindow({
           </Button>
         </div>
       </div>
-
       {/* --- CHAT AREA --- */}
       <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-4 bg-slate-50/50">
         {isInitializing ? (
@@ -238,7 +587,7 @@ export default function ChatWindow({
         ) : (
           <div className="flex flex-col gap-6 pb-2">
             {messages.map((msg) => (
-              <motion.div 
+              <motion.div
                 key={msg.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -256,15 +605,14 @@ export default function ChatWindow({
                     if (msg.parts) {
                       textToRender = msg.parts.filter(p => p.type === 'text').map(p => p.text).join('');
                     }
-                    
+
                     if (!textToRender.trim() && !msg.isError) return null; // Hide empty bubbles if only tools exist
-                    
+
                     return (
-                      <div className={`px-5 py-3 rounded-2xl text-sm shadow-sm leading-relaxed ${
-                        msg.role === 'user' 
-                          ? 'bg-orange-600 text-white rounded-br-none' 
-                          : 'bg-white text-gray-800 rounded-bl-none border border-gray-100'
-                      }`}>
+                      <div className={`px-5 py-3 rounded-2xl text-sm shadow-sm leading-relaxed ${msg.role === 'user'
+                        ? 'bg-orange-600 text-white rounded-br-none'
+                        : 'bg-white text-gray-800 rounded-bl-none border border-gray-100'
+                        }`}>
                         {msg.isError ? (
                           <span className="text-red-500">{textToRender}</span>
                         ) : (
@@ -273,23 +621,27 @@ export default function ChatWindow({
                       </div>
                     );
                   })()}
-
                   {/* Generative UI Tool Results */}
+
                   {(msg.role === 'assistant' || msg.role === 'model') && (
                     <div className="mt-1">
+
                       {/* Format 1: msg.toolInvocations (Standard AI SDK v3+) */}
-                      {msg.toolInvocations?.map((toolInv, i) => (
-                        <ToolResultRenderer key={`inv-${i}`} part={{ ...toolInv, state: toolInv.state === 'result' ? 'output-available' : 'partial-call', toolName: toolInv.toolName }} />
-                      ))}
-                      
+                      {
+                        msg.toolInvocations?.map((toolInv, i) => (
+                          <ToolResultRenderer key={`inv-${i}`} part={{ ...toolInv, state: toolInv.state === 'result' ? 'output-available' : 'partial-call', toolName: toolInv.toolName }} />
+                        ))
+                      }
+
                       {/* Format 2: msg.parts (Experimental/Alpha AI SDK) */}
-                      {msg.parts?.filter(p => p.type === 'tool-invocation' || (typeof isToolUIPart !== 'undefined' && isToolUIPart(p))).map((part, i) => {
-                        const actualPart = part.toolInvocation ? part.toolInvocation : part;
-                        return <ToolResultRenderer key={`part-${i}`} part={{ ...actualPart, state: actualPart.state === 'result' ? 'output-available' : actualPart.state, toolName: actualPart.toolName }} />;
-                      })}
+                      {
+                        msg.parts?.filter(p => p.type === 'tool-invocation' || (typeof isToolUIPart !== 'undefined' && isToolUIPart(p))).map((part, i) => {
+                          const actualPart = part.toolInvocation ? part.toolInvocation : part;
+                          return <ToolResultRenderer key={`part-${i}`} part={{ ...actualPart, state: actualPart.state === 'result' ? 'output-available' : actualPart.state, toolName: actualPart.toolName }} />;
+                        })
+                      }
                     </div>
                   )}
-
                   <span className="text-[10px] text-gray-400 mt-1.5 px-1 font-medium">
                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
@@ -301,25 +653,23 @@ export default function ChatWindow({
                 )}
               </motion.div>
             ))}
-
             {messages.length === 1 && !isLoading && SUGGESTIONS[language] && (
-               <div className="ml-11 mt-2 animate-in fade-in duration-500">
-                  <p className="text-xs text-gray-400 mb-2 pl-1 font-medium">Suggested questions:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {SUGGESTIONS[language].map((s, i) => (
-                      <button 
-                        key={i}
-                        onClick={() => handleSuggestionClick(s)}
-                        className="flex items-center gap-1.5 text-xs font-medium text-orange-700 bg-orange-50 border border-orange-100 hover:bg-orange-100 hover:border-orange-200 hover:scale-105 active:scale-95 transition-all px-3 py-2 rounded-full shadow-sm"
-                      >
-                        <Sparkles className="h-3 w-3 text-orange-500" />
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-               </div>
+              <div className="ml-11 mt-2 animate-in fade-in duration-500">
+                <p className="text-xs text-gray-400 mb-2 pl-1 font-medium">Suggested questions:</p>
+                <div className="flex flex-wrap gap-2">
+                  {SUGGESTIONS[language].map((s, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleSuggestionClick(s)}
+                      className="flex items-center gap-1.5 text-xs font-medium text-orange-700 bg-orange-50 border border-orange-100 hover:bg-orange-100 hover:border-orange-200 hover:scale-105 active:scale-95 transition-all px-3 py-2 rounded-full shadow-sm"
+                    >
+                      <Sparkles className="h-3 w-3 text-orange-500" />
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
-
             {isLoading && (
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center">
@@ -335,21 +685,20 @@ export default function ChatWindow({
           </div>
         )}
       </div>
-
       {/* --- INPUT AREA --- */}
       {language && (
         <div className="p-4 bg-white border-t border-gray-100">
           <form onSubmit={onSendMessage} className="flex gap-2 relative items-center">
-            <Input 
+            <Input
               value={input || ''}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
               className="pr-12 bg-gray-50 border-gray-200 focus-visible:ring-orange-500 rounded-full h-11 shadow-sm"
               disabled={isLoading}
             />
-            <Button 
-              type="submit" 
-              size="icon" 
+            <Button
+              type="submit"
+              size="icon"
               className="rounded-full bg-orange-600 hover:bg-orange-700 text-white absolute right-1.5 h-8 w-8 shadow-md"
               disabled={isLoading || !input?.trim()}
             >
