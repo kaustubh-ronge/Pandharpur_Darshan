@@ -642,9 +642,16 @@ export default function ChatWindow({
                       }
                     </div>
                   )}
-                  <span className="text-[10px] text-gray-400 mt-1.5 px-1 font-medium">
+                  {/* <span className="text-[10px] text-gray-400 mt-1.5 px-1 font-medium">
                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+                  </span> */}
+
+                  {msg.createdAt && (
+                    <span className="text-[10px] text-gray-400 mt-1.5 px-1 font-medium">
+                      {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  )}
+
                 </div>
                 {msg.role === 'user' && (
                   <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-1">

@@ -141,17 +141,7 @@ function parseRouteContext(pathname) {
 export async function POST(req) {
   try {
     const body = await req.json();
-    console.log(`\n=================================================`);
-    console.log(`--- RAW PAYLOAD DUMP ---`);
-    console.log(JSON.stringify(body, null, 2));
-    
     const { sessionId, language = 'english', currentRoute = '/', messages } = body;
-    console.log(`\n=================================================`);
-    console.log(`--- NEW CHAT REQUEST ---`);
-    console.log(`SessionID: ${sessionId}`);
-    console.log(`[USER QUERY]: "${messages?.[messages.length - 1]?.content || 'No message'}"`);
-    console.log(`Language: ${language}, Route: ${currentRoute}`);
-    console.log(`=================================================\n`);
 
     const decision = await aiRateLimiter.protect({
       headers: await headers(),
@@ -186,15 +176,15 @@ export async function POST(req) {
     }
 
     // Extract the latest user message sent by useChat
+
     const latestMessage = messages[messages.length - 1];
-    
+
     if (latestMessage && latestMessage.role === 'user') {
       let textContent = latestMessage.content || '';
       if (latestMessage.parts) {
         textContent = latestMessage.parts.filter(p => p.type === 'text').map(p => p.text).join('');
       }
 
-      // Save user message to DB
       await db.chatMessage.create({
         data: {
           chatSessionId: sessionId,
@@ -202,10 +192,8 @@ export async function POST(req) {
           content: textContent
         }
       });
-      console.log(`[DB] User message saved successfully.`);
     }
 
-    // Our messages are already provided by useChat, so we don't need to fetch from DB!
     const modelMessages = await convertToModelMessages(messages);
 
     const routeContext = parseRouteContext(currentRoute);
@@ -218,9 +206,6 @@ ${routeContext}
 [/DYNAMIC_CONTEXT]
     `;
 
-    console.log(`[AI] Starting streamText (ai@6.x) with gemini-2.5-flash...`);
-
-    // Single streamText with stopWhen for multi-step tool support (ai@6.x API)
     const result = streamText({
       model: google('gemini-2.5-flash'),
       system: `${BIG_SYSTEM_PROMPT}\n\n${DYNAMIC_CONTEXT}\n\n[SYSTEM INSTRUCTION: The user language preference is ${language}. When you call a tool that returns a list of locations (like hotels, temples), DO NOT list their raw route paths or URLs in your text. Just provide a friendly introductory sentence because visual cards will be displayed to the user automatically.]`,
@@ -233,7 +218,6 @@ ${routeContext}
             section: z.enum(['home', 'about', 'emergency', 'help', 'join_us', 'pricing', 'temples', 'festivals', 'attractions', 'bookings_hotels', 'bookings_bhaktaniwas', 'bookings_restaurants', 'bookings_travel', 'bookings_kirtankars', 'darshan_yatra_guide']).describe('The section of the website to get the URL for'),
           }),
           execute: async ({ section }) => {
-            console.log(`[TOOL CALL] getWebsiteNavigation - Section: ${section}`);
             const routeMap = {
               home: '/', about: '/about', emergency: '/emergency', help: '/help',
               join_us: '/join-us', pricing: '/pricing', temples: '/temples',
@@ -252,21 +236,20 @@ ${routeContext}
           description: 'Fetch the list of all available hotels in Pandharpur from CMS.',
           inputSchema: z.object({}),
           execute: async () => {
-            console.log(`[TOOL CALL] getHotels invoked`);
             try {
               const data = await sanityFetch({ query: getAllHotelsQuery });
-              return { 
-                results: (data || []).map(i => ({ 
-                  name: i.name, 
-                  slug: i.slug, 
+              return {
+                results: (data || []).map(i => ({
+                  name: i.name,
+                  slug: i.slug,
                   priceRange: i.priceRange,
                   address: i.address,
                   description: i.description,
                   contact: i.whatsappNumber || i.contactNumbers,
                   facilities: i.facilities,
                   roomTypes: i.roomTypes,
-                  category: 'hotels' 
-                })) 
+                  category: 'hotels'
+                }))
               };
             } catch (err) { return { error: err.message }; }
           }
@@ -275,20 +258,19 @@ ${routeContext}
           description: 'Fetch the list of all available Bhaktaniwas (Dharamshalas) in Pandharpur from CMS.',
           inputSchema: z.object({}),
           execute: async () => {
-            console.log(`[TOOL CALL] getBhaktaniwas invoked`);
             try {
               const data = await sanityFetch({ query: getAllBhaktaniwasQuery });
-              return { 
-                results: (data || []).map(i => ({ 
-                  name: i.name, 
-                  slug: i.slug, 
-                  address: i.address, 
+              return {
+                results: (data || []).map(i => ({
+                  name: i.name,
+                  slug: i.slug,
+                  address: i.address,
                   description: i.description,
                   managedBy: i.managedBy,
                   contact: i.whatsappNumber || i.contactNumbers,
                   capacity: i.capacity,
-                  category: 'bhaktaniwas' 
-                })) 
+                  category: 'bhaktaniwas'
+                }))
               };
             } catch (err) { return { error: err.message }; }
           }
@@ -297,19 +279,18 @@ ${routeContext}
           description: 'Fetch the list of all temples in Pandharpur from CMS.',
           inputSchema: z.object({}),
           execute: async () => {
-            console.log(`[TOOL CALL] getTemples invoked`);
             try {
               const data = await sanityFetch({ query: getAllTemplesQuery });
-              return { 
-                results: (data || []).map(i => ({ 
-                  name: i.name, 
-                  slug: i.slug, 
+              return {
+                results: (data || []).map(i => ({
+                  name: i.name,
+                  slug: i.slug,
                   description: i.description,
                   timing: i.timing,
                   address: i.address,
                   importance: i.importance,
-                  category: 'temples' 
-                })) 
+                  category: 'temples'
+                }))
               };
             } catch (err) { return { error: err.message }; }
           }
@@ -318,20 +299,19 @@ ${routeContext}
           description: 'Fetch the list of all restaurants in Pandharpur from CMS.',
           inputSchema: z.object({}),
           execute: async () => {
-            console.log(`[TOOL CALL] getRestaurants invoked`);
             try {
               const data = await sanityFetch({ query: getAllRestaurantsQuery });
-              return { 
-                results: (data || []).map(i => ({ 
-                  name: i.name, 
-                  slug: i.slug, 
-                  cuisine: i.cuisineType, 
+              return {
+                results: (data || []).map(i => ({
+                  name: i.name,
+                  slug: i.slug,
+                  cuisine: i.cuisineType,
                   address: i.address,
                   description: i.description,
                   specialties: i.specialties,
                   timing: i.timing,
-                  category: 'restaurants' 
-                })) 
+                  category: 'restaurants'
+                }))
               };
             } catch (err) { return { error: err.message }; }
           }
@@ -340,19 +320,18 @@ ${routeContext}
           description: 'Fetch the list of all Kirtankars (spiritual storytellers/singers) available for booking or guidance.',
           inputSchema: z.object({}),
           execute: async () => {
-            console.log(`[TOOL CALL] getKirtankars invoked`);
             try {
               const data = await sanityFetch({ query: getAllKirtankarsQuery });
-              return { 
-                results: (data || []).map(i => ({ 
-                  name: i.name, 
-                  slug: i.slug, 
+              return {
+                results: (data || []).map(i => ({
+                  name: i.name,
+                  slug: i.slug,
                   description: i.description,
                   specialization: i.specialization,
                   hometown: i.hometown,
                   contact: i.whatsappNumber,
-                  category: 'kirtankars' 
-                })) 
+                  category: 'kirtankars'
+                }))
               };
             } catch (err) { return { error: err.message }; }
           }
@@ -361,10 +340,8 @@ ${routeContext}
           description: 'Fetch the list of all other tourist attractions, sightseeing spots, and cultural locations in Pandharpur grouped by category.',
           inputSchema: z.object({}),
           execute: async () => {
-            console.log(`[TOOL CALL] getOtherAttractions invoked`);
             try {
               const data = await sanityFetch({ query: getAttractionsByCategoryQuery });
-              // Flatten categories into a list of attractions but keep the category context
               const attractions = [];
               if (data && Array.isArray(data)) {
                 data.forEach(category => {
@@ -389,21 +366,20 @@ ${routeContext}
           description: 'Fetch the list of all travel services, transport options, and operators in Pandharpur.',
           inputSchema: z.object({}),
           execute: async () => {
-            console.log(`[TOOL CALL] getTravels invoked`);
             try {
               const data = await sanityFetch({ query: getAllTravelsQuery });
-              return { 
-                results: (data || []).map(i => ({ 
-                  name: i.name, 
-                  slug: i.slug, 
+              return {
+                results: (data || []).map(i => ({
+                  name: i.name,
+                  slug: i.slug,
                   travelType: i.travelType,
                   description: i.description,
                   address: i.address,
                   operatingHours: i.operatingHours,
                   keyRoutes: i.keyRoutes,
                   contact: i.whatsappNumber || i.contactNumbers,
-                  category: 'travels' 
-                })) 
+                  category: 'travels'
+                }))
               };
             } catch (err) { return { error: err.message }; }
           }
@@ -415,7 +391,6 @@ ${routeContext}
             slug: z.string().describe('The URL slug of the specific item')
           }),
           execute: async ({ category, slug }) => {
-            console.log(`[TOOL CALL] getSpecificDetails - Cat: ${category}, Slug: ${slug}`);
             try {
               let query = '';
               if (category === 'hotels') query = getHotelBySlugQuery;
@@ -426,7 +401,7 @@ ${routeContext}
               else if (category === 'kirtankars') query = getKirtankarBySlugQuery;
               else if (category === 'attractions') query = getAttractionBySlugQuery;
               const data = await sanityFetch({ query, params: { slug } });
-              
+
               let urlBase = 'pandharpur-bookings/';
               if (category === 'temples') urlBase = 'temples/';
               else if (category === 'attractions') urlBase = 'pandharpur-attractions/';
@@ -437,35 +412,27 @@ ${routeContext}
           }
         }),
       },
-      async onFinish({ text }) {
-        const finalText = text || '[No response]';
-        console.log(`\n[AI STREAM FINISHED] Text length: ${finalText.length} chars`);
-        console.log(`[AI RESPONSE PREVIEW]: "${finalText.substring(0, 150)}..."`);
-        try {
-          await db.$transaction(async (tx) => {
-            await tx.chatMessage.create({
-              data: { chatSessionId: sessionId, role: 'model', content: finalText }
+      async onFinish({ text: finalText }) {
+        if (sessionId && finalText) {
+          try {
+            await db.$transaction(async (tx) => {
+              await tx.chatMessage.create({
+                data: { chatSessionId: sessionId, role: 'model', content: finalText }
+              });
+              await tx.chatSession.update({
+                where: { id: sessionId },
+                data: { updatedAt: new Date() }
+              });
             });
-            await tx.chatSession.update({
-              where: { id: sessionId },
-              data: { updatedAt: new Date() }
-            });
-          });
-          console.log(`[DB] AI response saved successfully.`);
-        } catch (dbErr) {
-          console.error(`[DB ERROR] Failed to save AI response:`, dbErr);
+          } catch (dbErr) {
+            console.error(dbErr);
+          }
         }
-      },
-      onError: (err) => {
-        console.error(`[AI ERROR]:`, err);
       }
     });
 
-    console.log(`[API] Returning UI message stream response to client...`);
     return result.toUIMessageStreamResponse();
   } catch (error) {
-    console.error(`\n[FATAL ERROR] API Route crashed:`, error);
     return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500 });
   }
 }
-

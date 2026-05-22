@@ -78,7 +78,11 @@ export async function generateAiRoute(formData) {
     });
     return { success: true, route: newRoute };
   } catch (error) {
-    return { success: false, error: error.message };
+    let errorMessage = error.message;
+    if (errorMessage?.toLowerCase().includes('quota') || errorMessage?.includes('429') || errorMessage?.toLowerCase().includes('exhausted')) {
+      errorMessage = "Please try again later";
+    }
+    return { success: false, error: errorMessage };
   }
 }
 

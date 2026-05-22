@@ -46,7 +46,7 @@ function AiRoutePlanner({ setMapLocations, onPlanCreated, useFetch, zodResolver,
       onPlanCreated(result.route, "ai_route");
       form.reset();
     } else {
-      toast.error("Failed to generate AI Routes. Please try again.");
+      toast.error(result?.error || "Failed to generate AI Routes. Please try again.");
     }
   };
 

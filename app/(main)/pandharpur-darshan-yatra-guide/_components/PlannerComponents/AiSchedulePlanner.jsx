@@ -45,8 +45,8 @@ function AiSchedulePlanner({
       setMapLocations(locs);
       onPlanCreated(result.schedule, 'ai_schedule');
       form.reset();
-    }else{
-      toast.error("Failed to generate AI Schedule. Please try again.");
+    } else {
+      toast.error(result?.error || "Failed to generate AI Schedule. Please try again.");
     }
   };
 

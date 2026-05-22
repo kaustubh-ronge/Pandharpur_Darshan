@@ -584,7 +584,8 @@ import { Input } from '@/components/ui/input';
 import { MessageSquare, Plus, ChevronLeft, Trash2, Pencil, Check, X, Loader2 } from 'lucide-react';
 import ChatIcon from './ChatIcon';
 import ChatWindow from './ChatWindow';
-import { useChat } from '@ai-sdk/react'
+import { useChat } from '@ai-sdk/react';
+import { toast } from 'sonner';
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -617,7 +618,11 @@ export default function Chatbot() {
     onFinish: () => {
       fetchSessionHistory(); // Refresh history when stream finishes
     },
-    onError: (err) => console.error("Chat error:", err)
+    onError: (err) => {
+      console.error("Chat error:", err);
+      // Display the toast message exactly as requested when quota is reached
+      toast.error("Please try again later");
+    }
   });
   const isChatLoading = status === 'streaming' || status === 'submitted';
   // Rename & Delete State

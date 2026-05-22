@@ -35,9 +35,8 @@ function AiTripPlanner({ setMapLocations, onPlanCreated, useFetch, zodResolver, 
       setMapLocations(locs);
       onPlanCreated(result.trip, 'ai_trip');
       form.reset({ prompt: "", duration: 2, people: 2, budget: "Mid-Range" });
-    }
-    else{
-      toast.error("Failed to generate AI Trip. Please try again.");
+    } else {
+      toast.error(result?.error || "Failed to generate AI Trip. Please try again.");
     }
   };
 
