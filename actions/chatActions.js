@@ -1,64 +1,14 @@
 'use server';
 
 import { checkUser } from '@/lib/checkUser';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { db } from '@/lib/prisma';
 import { chatMessageSchema, sessionIdSchema } from '@/lib/schema';
 import { aiRateLimiter } from '@/lib/arcjet';
 import { headers } from 'next/headers';
 
 // --- Configuration ---
-if (!process.env.GEMINI_API_KEY) {
-  throw new Error('CRITICAL: GEMINI_API_KEY is not configured.');
-}
+// The AI system prompt and model initialization have been moved to app/api/chat/route.js
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-const MODEL_NAME = 'gemini-2.0-flash';
-
-const BIG_SYSTEM_PROMPT = `
-[START PROMPT]
-# I. CORE IDENTITY & PERSONA
-You are "Pandhari Mitra," an AI-powered virtual guide for the holy city of Pandharpur. Your persona is Knowledgeable, Wise, Calm, Empathetic, Modern, and Tech-Savvy. You are perfectly fluent in Marathi, English, and Hindi.
-
-# II. CONVERSATIONAL RULES
-- **DO NOT** introduce yourself in every message. Only say who you are if specifically asked.
-- Be concise and direct.
-- If asked about "Darshan", provide general queue info unless you have live data.
-- Use Markdown for formatting (bold, bullet points).
-
-# III. KNOWLEDGE DOMAIN & CAPABILITIES (20 Features)
-You are programmed to perform the following 20 key functions seamlessly:
-1.  **Hyper-Personalized Itinerary Planner:** Create detailed schedules based on interests, duration, budget, age, and mobility.
-2.  **Live Data Integration:** Provide real-time darshan queues, aarti timings, weather, and events.
-3.  **Advanced Multilingual Support:** Converse fluently in Marathi, Hindi, and English.
-4.  **Rich Media Integration:** Respond with maps, images, videos, and audio clips.
-5.  **Accommodation & Travel Assistant:** Help find and book hotels, dharamshalas, and transport.
-6.  **"Spiritual Companion" Mode:** Share daily verses, stories of saints (Dnyaneshwar, Tukaram), and explain spiritual concepts.
-7.  **Culinary & Shopping Advisor:** Recommend local cuisine, eateries, and authentic shops.
-8.  **Emergency & Safety Protocol:** Provide instant access to emergency contacts and safety tips.
-9.  **Accessibility Advisor:** Offer information for elderly visitors and people with disabilities (ramps, facilities, crowd levels).
-10. **Gamified "City Explorer" Challenge:** Create an interactive scavenger hunt to guide users through landmarks.
-11. **Seasonal "Wari" Pilgrimage Guide:** A dedicated mode during the Wari season with live Palkhi tracking and Varkari tips.
-12. **Cultural Etiquette Guide:** Inform visitors about temple dress codes, do's and don'ts, and local customs.
-13. **Session Memory & Context Awareness:** Remember the conversation's context within a session.
-14. **Community Insights Hub:** Pull and display curated tips and reviews from other travelers.
-15. **Intelligent Feedback Collector:** Proactively ask for feedback to improve.
-16. **Offline Content Suggestion:** Recommend detailed articles and blogs on the main website.
-17. **Deep Google Maps Integration:** Provide embedded maps and multi-modal directions (walking, auto-rickshaw).
-18. **Real-time Phrase Translator:** Translate common tourist phrases into Marathi upon request (e.g., 'How do I ask for water?').
-19. **Festival Deep-Dive Mode:** When a major festival is near, provide hyper-specific details about special arrangements and schedules.
-20. **Personalized Preference Profile:** For logged-in users, learn and save preferences like dietary restrictions or specific interests to tailor all future recommendations.
-
-# IV. CONSTRAINTS & SAFETY
-- Remain neutral on religious matters. Do not ask for or store PII. Stay on the topic of Pandharpur.
-[END PROMPT]
-`;
-
-const model = genAI.getGenerativeModel({
-  model: MODEL_NAME,
-  systemInstruction: BIG_SYSTEM_PROMPT,
-});
 
 // --- 1. Fetch Chat History (Sidebar) ---
 export async function getUserSessions(guestId = null) {
@@ -164,98 +114,6 @@ export async function updateChatSessionTitle(sessionId, newTitle) {
 }
 
 // --- 6. Send Message ---
-export async function sendMessage(sessionId, userMessage, language = 'english') {
-  try {
-    // Arcjet Protection
-    const decision = await aiRateLimiter.protect({
-      headers: await headers(),
-    });
-
-    if (decision.isDenied()) {
-      if (decision.reason.isRateLimit()) {
-        return { success: false, error: "AI rate limit exceeded. Please try again in 10 minutes." };
-      }
-      return { success: false, error: "Access denied by security layer." };
-    }
-
-    // Validate input
-    const validation = chatMessageSchema.safeParse({ sessionId, userMessage, language });
-    if (!validation.success) {
-      return { success: false, error: "Invalid request parameters." };
-    }
-
-    const { 
-      sessionId: validSessionId, 
-      userMessage: validUserMessage, 
-      language: validLanguage 
-    } = validation.data;
-
-    const user = await checkUser();
-    const session = await db.chatSession.findUnique({
-      where: { id: validSessionId }
-    });
-
-    if (!session) throw new Error("Session not found");
-
-    // Ownership Check
-    if (user) {
-      if (session.userId !== user.id) throw new Error("Unauthorized");
-    } else {
-      if (session.userId) throw new Error("Unauthorized");
-    }
-
-    // --- IDEMPOTENCY CHECK ---
-    const recentMessage = await db.chatMessage.findFirst({
-      where: {
-        chatSessionId: validSessionId,
-        role: 'user',
-        content: validUserMessage,
-        createdAt: { gte: new Date(Date.now() - 5000) },
-      }
-    });
-
-    if (recentMessage) {
-      return { success: true, isDuplicate: true };
-    }
-    // -------------------------
-
-    await db.chatMessage.create({
-      data: { chatSessionId: validSessionId, role: 'user', content: validUserMessage },
-    });
-
-    const recentHistory = await db.chatMessage.findMany({
-      where: { chatSessionId: validSessionId },
-      orderBy: { createdAt: 'asc' },
-      take: -30,
-    });
-
-    const historyForAI = recentHistory.slice(0, -1).map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.content }]
-    }));
-
-    const chat = model.startChat({ history: historyForAI });
-    const finalPrompt = `${validUserMessage}\n\n[SYSTEM: Respond in ${validLanguage}. Concise.]`;
-
-    const result = await chat.sendMessage(finalPrompt);
-    const aiResponseText = await result.response.text();
-
-    // Atomic update for response and session
-    const finalResult = await db.$transaction(async (tx) => {
-      const aiMsg = await tx.chatMessage.create({
-        data: { chatSessionId: validSessionId, role: 'model', content: aiResponseText }
-      });
-
-      await tx.chatSession.update({
-        where: { id: validSessionId },
-        data: { updatedAt: new Date() }
-      });
-
-      return aiMsg;
-    });
-
-    return { success: true, aiMessage: { role: 'model', content: finalResult.content, createdAt: finalResult.createdAt } };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-}
+// DEPRECATED: This has been migrated to the Vercel AI SDK architecture at app/api/chat/route.js
+// and is no longer used by the frontend.
+// export async function sendMessage(sessionId, userMessage, language = 'english') { ... }

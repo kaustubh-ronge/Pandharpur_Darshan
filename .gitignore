@@ -56,3 +56,5 @@ next-env.d.ts
 /test
 
 /lib/generated/prisma
+
+implementation_plan.md

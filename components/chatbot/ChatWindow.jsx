@@ -1,9 +1,11 @@
 'use client';
 
-import { Send, Bot, User, X, RotateCw, PanelLeftOpen, Loader2, Sparkles } from 'lucide-react';
+import { isToolUIPart, getToolName } from 'ai';
+import { Send, Bot, User, X, RotateCw, PanelLeftOpen, Loader2, Sparkles, Database, Star, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import LanguageSelection from './LanguageSelection';
 import { useRef, useEffect } from 'react';
 
@@ -11,19 +13,145 @@ import { useRef, useEffect } from 'react';
 // Every item returned in the map now has a unique key, including plain text spans.
 const FormattedText = ({ text }) => {
   if (!text) return null;
-  const parts = text.split(/(\*\*.*?\*\*)/g);
+
+  const renderBold = (text) => {
+    const chunks = text.split(/(\*\*.*?\*\*)/g);
+    return chunks.map((chunk, i) =>
+      chunk.startsWith('**') && chunk.endsWith('**') ? (
+        <strong key={i} className="font-bold text-orange-950">
+          {chunk.slice(2, -2)}
+        </strong>
+      ) : (
+        chunk
+      )
+    );
+  };
+
   return (
-    <span className="whitespace-pre-wrap leading-relaxed">
-      {parts.map((part, index) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={index} className="font-bold text-orange-900">{part.slice(2, -2)}</strong>;
+    <div className="space-y-2">
+      {text.split('\n').map((line, i) => {
+        if (line.trim().startsWith('* ')) {
+          return (
+            <li key={i} className="ml-5 list-disc marker:text-orange-500 pl-1 text-[14.5px] leading-relaxed">
+              {renderBold(line.replace(/^\* /, ''))}
+            </li>
+          );
         }
-        // Wrap plain text in a span with a key too
-        return <span key={index}>{part}</span>;
+        if (line.trim().startsWith('- ')) {
+          return (
+            <li key={i} className="ml-5 list-disc marker:text-orange-500 pl-1 text-[14.5px] leading-relaxed">
+              {renderBold(line.replace(/^- /, ''))}
+            </li>
+          );
+        }
+        return (
+          <p key={i} className="min-h-[1rem] text-[14.5px] leading-relaxed">
+            {renderBold(line)}
+          </p>
+        );
       })}
-    </span>
+    </div>
   );
 };
+
+// --- Generative UI: Beautiful Tool Result Renderer ---
+function ToolResultRenderer({ part }) {
+  const isDone = part.state === 'output-available' || part.state === 'output-error';
+  const toolName = part.toolName || (typeof getToolName !== 'undefined' ? getToolName(part) : 'unknown');
+  
+  if (!isDone) {
+    let icon = <Loader2 className="w-4 h-4 animate-spin text-orange-600" />;
+    let label = "Thinking...";
+    if (toolName === 'getHotels') { icon = <Database className="w-4 h-4 animate-pulse text-orange-500" />; label = "Finding best hotels..."; }
+    if (toolName === 'getTemples') { icon = <Star className="w-4 h-4 animate-pulse text-yellow-500" />; label = "Finding temples..."; }
+    if (toolName === 'getRestaurants') { icon = <Database className="w-4 h-4 animate-pulse text-red-500" />; label = "Finding restaurants..."; }
+    if (toolName === 'getBhaktaniwas') { icon = <MapPin className="w-4 h-4 animate-pulse text-emerald-500" />; label = "Finding dharamshalas..."; }
+    
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
+        className="flex items-center gap-2 px-3 py-2 bg-orange-50/80 border border-orange-100 rounded-lg shadow-sm w-fit my-1.5"
+      >
+        {icon}
+        <span className="text-xs font-semibold text-orange-700 tracking-wide">{label}</span>
+      </motion.div>
+    );
+  }
+
+  if (part.state === 'output-error') return null;
+
+  const result = part.result;
+  if (!result || !result.results || result.results.length === 0) return null;
+
+  return (
+    <div className="w-[300px] sm:w-[360px] overflow-x-auto pb-4 pt-2 -mx-2 px-2 flex gap-4 snap-x scrollbar-thin scrollbar-thumb-orange-200">
+      <AnimatePresence>
+        {result.results.map((item, idx) => {
+          const itemUrl = item.url || (item.category === 'temples' ? `/temples/${item.slug}` : `/pandharpur-bookings/${item.category}/${item.slug}`);
+          
+          return (
+            <motion.div 
+              key={item.slug || idx}
+              initial={{ opacity: 0, scale: 0.9, x: 20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{ delay: idx * 0.1, type: "spring", bounce: 0.4 }}
+              className="min-w-[240px] snap-start bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative overflow-hidden group"
+            >
+              {/* Image Header */}
+              <div className="w-full h-32 relative bg-gray-100 overflow-hidden">
+                {item.image ? (
+                  <img 
+                    src={item.image} 
+                    alt={item.name} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-orange-50 text-orange-200">
+                    <Database className="w-8 h-8" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                
+                {/* Floating Badges */}
+                {item.price && (
+                  <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-md px-2 py-1 rounded-md shadow-sm">
+                    <span className="text-[10px] font-bold text-orange-700 uppercase tracking-wider">{item.price}</span>
+                  </div>
+                )}
+                {item.cuisine && (
+                  <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Star className="w-3 h-3 text-amber-400" />
+                    <span className="text-[10px] font-semibold text-white">{item.cuisine}</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Content Body */}
+              <div className="p-3 flex flex-col flex-1 bg-gradient-to-b from-white to-orange-50/30">
+                <h4 className="font-bold text-gray-800 text-[15px] leading-tight line-clamp-1 group-hover:text-orange-600 transition-colors">{item.name}</h4>
+                
+                {item.address && (
+                  <p className="text-[11px] font-medium text-gray-500 line-clamp-1 mt-1.5 flex items-center">
+                    <MapPin className="w-3 h-3 inline mr-1 text-orange-400 flex-shrink-0" />
+                    <span className="truncate">{item.address}</span>
+                  </p>
+                )}
+
+                <div className="mt-4 pt-3 border-t border-orange-100/50">
+                  <Link href={itemUrl} target="_blank">
+                    <Button size="sm" variant="outline" className="w-full border-orange-200 text-orange-700 bg-white hover:bg-orange-600 hover:text-white transition-all h-8 text-xs font-bold rounded-xl shadow-sm">
+                      View Details
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 // --- DATA: Suggested Questions ---
 const SUGGESTIONS = {
@@ -122,14 +250,47 @@ export default function ChatWindow({
                   </div>
                 )}
                 <div className={`max-w-[85%] sm:max-w-[75%] flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                  <div className={`px-5 py-3 rounded-2xl text-sm shadow-sm leading-relaxed ${
-                    msg.role === 'user' 
-                      ? 'bg-orange-600 text-white rounded-br-none' 
-                      : 'bg-white text-gray-800 rounded-bl-none border border-gray-100'
-                  }`}>
-                    {msg.isError ? <span className="text-red-500">{msg.content}</span> : <FormattedText text={msg.content} />}
-                  </div>
-                  <span className="text-[10px] text-gray-400 mt-1 px-1">
+                  {/* Text Message Bubble */}
+                  {(() => {
+                    let textToRender = msg.content || '';
+                    if (msg.parts) {
+                      textToRender = msg.parts.filter(p => p.type === 'text').map(p => p.text).join('');
+                    }
+                    
+                    if (!textToRender.trim() && !msg.isError) return null; // Hide empty bubbles if only tools exist
+                    
+                    return (
+                      <div className={`px-5 py-3 rounded-2xl text-sm shadow-sm leading-relaxed ${
+                        msg.role === 'user' 
+                          ? 'bg-orange-600 text-white rounded-br-none' 
+                          : 'bg-white text-gray-800 rounded-bl-none border border-gray-100'
+                      }`}>
+                        {msg.isError ? (
+                          <span className="text-red-500">{textToRender}</span>
+                        ) : (
+                          <FormattedText text={textToRender} />
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Generative UI Tool Results */}
+                  {(msg.role === 'assistant' || msg.role === 'model') && (
+                    <div className="mt-1">
+                      {/* Format 1: msg.toolInvocations (Standard AI SDK v3+) */}
+                      {msg.toolInvocations?.map((toolInv, i) => (
+                        <ToolResultRenderer key={`inv-${i}`} part={{ ...toolInv, state: toolInv.state === 'result' ? 'output-available' : 'partial-call', toolName: toolInv.toolName }} />
+                      ))}
+                      
+                      {/* Format 2: msg.parts (Experimental/Alpha AI SDK) */}
+                      {msg.parts?.filter(p => p.type === 'tool-invocation' || (typeof isToolUIPart !== 'undefined' && isToolUIPart(p))).map((part, i) => {
+                        const actualPart = part.toolInvocation ? part.toolInvocation : part;
+                        return <ToolResultRenderer key={`part-${i}`} part={{ ...actualPart, state: actualPart.state === 'result' ? 'output-available' : actualPart.state, toolName: actualPart.toolName }} />;
+                      })}
+                    </div>
+                  )}
+
+                  <span className="text-[10px] text-gray-400 mt-1.5 px-1 font-medium">
                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
@@ -180,7 +341,7 @@ export default function ChatWindow({
         <div className="p-4 bg-white border-t border-gray-100">
           <form onSubmit={onSendMessage} className="flex gap-2 relative items-center">
             <Input 
-              value={input}
+              value={input || ''}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
               className="pr-12 bg-gray-50 border-gray-200 focus-visible:ring-orange-500 rounded-full h-11 shadow-sm"
@@ -190,7 +351,7 @@ export default function ChatWindow({
               type="submit" 
               size="icon" 
               className="rounded-full bg-orange-600 hover:bg-orange-700 text-white absolute right-1.5 h-8 w-8 shadow-md"
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || !input?.trim()}
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
