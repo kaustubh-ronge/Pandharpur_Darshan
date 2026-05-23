@@ -25,9 +25,32 @@ export async function generateMetadata(props) {
 
     if (!hotel) return { title: "Hotel Not Found" };
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://pandharpurdarshan.com';
+    const url = `${baseUrl}/pandharpur-bookings/hotels/${slug}`;
+
+    const title = `${hotel.name} | Pandharpur Hotels`;
+    const description = `${hotel.name} is a ${hotel.category || 'premium'} hotel in Pandharpur offering ${hotel.facilities?.join(', ') || 'excellent stay amenities'}. Prices range around ${hotel.priceRange || 'affordable rates'}. Book your holy stay today.`;
+
     return {
-        title: `${hotel.name} | Pandharpur Hotels`,
-        description: `View details and amenities for ${hotel.name}, a hotel in Pandharpur.`,
+        title: title,
+        description: description,
+        keywords: [`${hotel.name}`, "Pandharpur hotel", `${hotel.category || 'budget'} stay in Pandharpur`, "hotel near Vitthal Rukmini Mandir"],
+        alternates: {
+            canonical: url,
+        },
+        openGraph: {
+            title: title,
+            description: description,
+            url: url,
+            type: "article",
+            images: hotel.image ? [{ url: hotel.image }] : [],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: title,
+            description: description,
+            images: hotel.image ? [hotel.image] : [],
+        },
     };
 }
 
@@ -48,5 +71,52 @@ export default async function SingleHotelPage(props) {
         notFound();
     }
 
-    return <HotelPageClient hotel={hotel} />;
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://pandharpurdarshan.com';
+    
+    const url = `${baseUrl}/pandharpur-bookings/hotels/${slug}`;
+
+    const breadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": baseUrl },
+            { "@type": "ListItem", "position": 2, "name": "Bookings", "item": `${baseUrl}/pandharpur-bookings` },
+            { "@type": "ListItem", "position": 3, "name": "Hotels", "item": `${baseUrl}/pandharpur-bookings#hotels` },
+            { "@type": "ListItem", "position": 4, "name": hotel.name, "item": url }
+        ]
+    };
+
+    const schemaMarkup = {
+        "@context": "https://schema.org",
+        "@type": "Hotel",
+        "name": hotel.name,
+        "image": hotel.image,
+        "description": `${hotel.name} is a ${hotel.category || 'premium'} hotel in Pandharpur.`,
+        "priceRange": hotel.priceRange || "$$",
+        "starRating": {
+            "@type": "Rating",
+            "ratingValue": hotel.rating || "4.0"
+        },
+        "amenityFeature": (hotel.facilities || []).map(facility => ({
+            "@type": "LocationFeatureSpecification",
+            "name": facility,
+            "value": true
+        })),
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": hotel.address || "Pandharpur",
+            "addressLocality": "Pandharpur",
+            "addressRegion": "Maharashtra",
+            "addressCountry": "IN"
+        },
+        "url": url
+    };
+
+    return (
+        <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }} />
+            <HotelPageClient hotel={hotel} />
+        </>
+    );
 }

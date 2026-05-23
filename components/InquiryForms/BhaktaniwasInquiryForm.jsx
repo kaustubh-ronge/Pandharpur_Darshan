@@ -102,20 +102,7 @@ export function BhaktaniwasInquiryForm({ bhaktaniwas, onFormSubmit }) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  if (!isSignedIn) {
-    return (
-      <div className="text-center space-y-5 py-4">
-        <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border border-orange-200 dark:border-orange-800">
-          <p className="font-semibold text-base text-orange-800 dark:text-orange-200">Please sign in to continue</p>
-        </div>
-        <SignInButton mode="modal">
-          <Button size="lg" className="w-full h-14 text-base font-bold text-white bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 hover:from-orange-600 hover:via-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-red-500/20">
-            Sign In
-          </Button>
-        </SignInButton>
-      </div>
-    );
-  }
+
 
   return (
     <Card className="border-none shadow-none bg-transparent">
@@ -175,10 +162,19 @@ export function BhaktaniwasInquiryForm({ bhaktaniwas, onFormSubmit }) {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Button type="submit" className="w-full group h-14 text-base font-bold rounded-lg text-white bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 hover:from-orange-600 hover:via-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-red-500/20">
-              Inquire via WhatsApp
-              <Send className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5" />
-            </Button>
+            {isSignedIn ? (
+              <Button type="submit" className="w-full group h-14 text-base font-bold rounded-lg text-white bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 hover:from-orange-600 hover:via-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-red-500/20">
+                Inquire via WhatsApp
+                <Send className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5" />
+              </Button>
+            ) : (
+              <SignInButton mode="modal">
+                <Button type="button" className="w-full group h-14 text-base font-bold rounded-lg text-white bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 hover:from-orange-600 hover:via-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-red-500/20">
+                  Login to Inquire
+                  <User className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5" />
+                </Button>
+              </SignInButton>
+            )}
           </motion.div>
         </motion.form>
       </CardContent>

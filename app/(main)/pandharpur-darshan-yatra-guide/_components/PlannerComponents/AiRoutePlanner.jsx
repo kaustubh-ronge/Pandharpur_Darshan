@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { aiRouteSchema } from '@/lib/schema';
+import { useUser, SignInButton } from "@clerk/nextjs";
 
 /**
  * AiRoutePlanner (Client Component)
@@ -22,6 +23,7 @@ import { aiRouteSchema } from '@/lib/schema';
  * server action.
  */
 function AiRoutePlanner({ setMapLocations, onPlanCreated, useFetch, zodResolver, useForm, z, generateAiRoute }) {
+  const { isSignedIn } = useUser();
   const { fn: generate, loading, error } = useFetch(generateAiRoute);
   const form = useForm({ resolver: zodResolver(aiRouteSchema), defaultValues: { startLocation: "" } });
 
@@ -58,7 +60,13 @@ function AiRoutePlanner({ setMapLocations, onPlanCreated, useFetch, zodResolver,
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField control={form.control} name="startLocation" render={({ field }) => <FormItem><FormLabel>Your Starting Location</FormLabel><FormControl><Input placeholder="e.g., Pune, Maharashtra" {...field} /></FormControl><FormMessage /></FormItem>} />
-            <Button type="submit" disabled={loading} className="w-full">{loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</> : <><Route className="mr-2 h-4 w-4" />Generate Routes</>}</Button>
+            {isSignedIn ? (
+              <Button type="submit" disabled={loading} className="w-full">{loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</> : <><Route className="mr-2 h-4 w-4" />Generate Routes</>}</Button>
+            ) : (
+              <SignInButton mode="modal">
+                <Button type="button" className="w-full"><Route className="mr-2 h-4 w-4" /> Login to Generate Routes</Button>
+              </SignInButton>
+            )}
           </form>
         </Form>
         {loading && <div className="text-center pt-4"><Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" /></div>}

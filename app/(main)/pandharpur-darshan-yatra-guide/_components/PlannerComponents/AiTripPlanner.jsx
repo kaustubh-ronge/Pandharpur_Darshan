@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from "sonner";
 import { aiTripSchema } from '@/lib/schema';
+import { useUser, SignInButton } from "@clerk/nextjs";
 
 /**
  * AiTripPlanner (Client Component)
@@ -24,6 +25,7 @@ import { aiTripSchema } from '@/lib/schema';
  * generation server action.
  */
 function AiTripPlanner({ setMapLocations, onPlanCreated, useFetch, zodResolver, useForm, z, generateAiTrip }) {
+  const { isSignedIn } = useUser();
   const { fn: generate, loading, error } = useFetch(generateAiTrip);
   const form = useForm({ resolver: zodResolver(aiTripSchema), defaultValues: { prompt: "", duration: 2, people: 2, budget: "Mid-Range" } });
 
@@ -52,7 +54,13 @@ function AiTripPlanner({ setMapLocations, onPlanCreated, useFetch, zodResolver, 
               <FormField control={form.control} name="people" render={({ field }) => <FormItem><FormLabel>People</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>} />
               <FormField control={form.control} name="budget" render={({ field }) => <FormItem><FormLabel>Budget</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl><SelectContent><SelectItem value="Budget">Budget</SelectItem><SelectItem value="Mid-Range">Mid-Range</SelectItem><SelectItem value="Luxury">Luxury</SelectItem></SelectContent></Select><FormMessage /></FormItem>} />
             </div>
-            <Button type="submit" disabled={loading} className="w-full">{loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</> : <><Sparkles className="mr-2 h-4 w-4" />Generate AI Trip</>}</Button>
+            {isSignedIn ? (
+              <Button type="submit" disabled={loading} className="w-full">{loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</> : <><Sparkles className="mr-2 h-4 w-4" />Generate AI Trip</>}</Button>
+            ) : (
+              <SignInButton mode="modal">
+                <Button type="button" className="w-full"><Sparkles className="mr-2 h-4 w-4" /> Login to Generate AI Trip</Button>
+              </SignInButton>
+            )}
           </form>
         </Form>
         {loading && <div className="text-center pt-4"><Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" /></div>}

@@ -72,20 +72,7 @@ export function KirtankarInquiryForm({ kirtankar, onFormSubmit }) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (!isSignedIn) {
-        return (
-            <div className="text-center space-y-5 py-4">
-                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
-                    <p className="font-semibold text-base text-orange-800">Please sign in to send an inquiry</p>
-                </div>
-                <SignInButton mode="modal">
-                    <Button size="lg" className="w-full h-14 text-base font-bold text-white bg-gradient-to-r from-orange-500 to-pink-600">
-                        Sign In
-                    </Button>
-                </SignInButton>
-            </div>
-        );
-    }
+
 
     return (
         <Card className="border-none shadow-none bg-transparent">
@@ -124,10 +111,19 @@ export function KirtankarInquiryForm({ kirtankar, onFormSubmit }) {
                     </motion.div>
 
                     <motion.div variants={itemVariants}>
-                        <Button type="submit" className="w-full group h-14 text-base font-bold rounded-lg text-white bg-gradient-to-r from-orange-500 to-pink-600">
-                            Inquire via WhatsApp
-                            <Send className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5" />
-                        </Button>
+                        {isSignedIn ? (
+                            <Button type="submit" className="w-full group h-14 text-base font-bold rounded-lg text-white bg-gradient-to-r from-orange-500 to-pink-600">
+                                Inquire via WhatsApp
+                                <Send className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5" />
+                            </Button>
+                        ) : (
+                            <SignInButton mode="modal">
+                                <Button type="button" className="w-full group h-14 text-base font-bold rounded-lg text-white bg-gradient-to-r from-orange-500 to-pink-600">
+                                    Login to Inquire
+                                    <User className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5" />
+                                </Button>
+                            </SignInButton>
+                        )}
                     </motion.div>
                 </motion.form>
             </CardContent>

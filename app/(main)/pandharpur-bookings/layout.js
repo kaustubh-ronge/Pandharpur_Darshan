@@ -1,10 +1,19 @@
 import { AmberBackground } from "@/components/AmberSharedBackground";
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://pandharpurdarshan.com';
+
 export const metadata = {
-  title: "Bookings",
-  robots: {
-    index: false,
-    follow: false,
+  title: "Pandharpur Bookings & Pilgrim Information",
+  description: "Find and book hotels, bhaktaniwas, travels, restaurants, and kirtankars in Pandharpur for your holy yatra.",
+  keywords: ["Pandharpur hotels", "Bhaktaniwas booking", "Travel to Pandharpur", "Kirtankar booking", "Pandharpur restaurants"],
+  alternates: {
+    canonical: `${baseUrl}/pandharpur-bookings`,
+  },
+  openGraph: {
+    title: "Pandharpur Bookings | Your Guide to a Comfortable Stay",
+    description: "Find and book hotels, bhaktaniwas, travels, restaurants, and kirtankars in Pandharpur.",
+    url: `${baseUrl}/pandharpur-bookings`,
+    type: "website",
   },
 };
 

@@ -21,6 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { manualTripSchema } from '@/lib/schema';
+import { useUser, SignInButton } from "@clerk/nextjs";
 
 /**
  * ManualTripPlanner (Client Component)
@@ -29,6 +30,7 @@ import { manualTripSchema } from '@/lib/schema';
  * It handles form state, validation, and submission to the server action.
  */
 function ManualTripPlanner({ setMapLocations, onPlanCreated, ppur_attractions, useFetch, zodResolver, useForm, z, format, cn, createManualTrip }) {
+  const { isSignedIn } = useUser();
   const { fn: create, loading } = useFetch(createManualTrip);
   const form = useForm({ resolver: zodResolver(manualTripSchema), defaultValues: { title: "", locations: [] } });
   const watchedLocations = form.watch('locations');
@@ -66,7 +68,13 @@ function ManualTripPlanner({ setMapLocations, onPlanCreated, ppur_attractions, u
             </PopoverContent></Popover><FormMessage /></FormItem>} />
             <FormField control={form.control} name="locations" render={() => (<FormItem><FormLabel>Select Locations</FormLabel><ScrollArea className="h-40 w-full rounded-md border p-4">{ppur_attractions.map((item) => (<FormField key={item.id} control={form.control} name="locations" render={({ field }) => (<FormItem className="flex flex-row items-start space-x-3 space-y-0 mb-2"><FormControl><Checkbox checked={field.value?.includes(item.label)} onCheckedChange={(checked) => { return checked ? field.onChange([...field.value, item.label]) : field.onChange(field.value?.filter((value) => value !== item.label)); }} /></FormControl><FormLabel className="font-normal">{item.label}</FormLabel></FormItem>)} />))}</ScrollArea><FormMessage /></FormItem>)} />
             <FormField control={form.control} name="preferences" render={({ field }) => <FormItem><FormLabel>Preferences</FormLabel><FormControl><Textarea placeholder="Any special requests or notes..." {...field} /></FormControl><FormMessage /></FormItem>} />
-            <Button type="submit" disabled={loading} className="w-full">{loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</> : <><PlusCircle className="mr-2 h-4 w-4" />Save Manual Trip</>}</Button>
+            {isSignedIn ? (
+              <Button type="submit" disabled={loading} className="w-full">{loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</> : <><PlusCircle className="mr-2 h-4 w-4" />Save Manual Trip</>}</Button>
+            ) : (
+              <SignInButton mode="modal">
+                <Button type="button" className="w-full"><PlusCircle className="mr-2 h-4 w-4" /> Login to Save Trip</Button>
+              </SignInButton>
+            )}
           </form>
         </Form>
       </CardContent>

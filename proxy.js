@@ -12,6 +12,10 @@ const isPublicRoute = createRouteMatcher([
   "/pandharpur-attractions(.*)",
   "/pandharpur-festivals(.*)",
   "/temples(.*)",
+  "/pandharpur-bookings(.*)",
+  "/pandharpur-darshan-yatra-guide(.*)",
+  "/pricing(.*)",
+  "/join-us(.*)",
   "/sitemap.xml",
   "/robots.txt",
   "/.well-known(.*)",
@@ -32,7 +36,12 @@ export default clerkMiddleware(async (auth, req) => {
     path.startsWith("/pandharpur-attractions") ||
     path.startsWith("/pandharpur-festivals") ||
     path.startsWith("/temples") ||
-    path.startsWith("/.well-known")
+    path.startsWith("/pandharpur-bookings") ||
+    path.startsWith("/pandharpur-darshan-yatra-guide") ||
+    path.startsWith("/pricing") ||
+    path.startsWith("/join-us") ||
+    path.startsWith("/.well-known") ||
+    path.startsWith("/api/revalidate")
   ) {
     return NextResponse.next();
   }

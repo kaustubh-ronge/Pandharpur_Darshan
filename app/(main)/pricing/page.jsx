@@ -1,10 +1,19 @@
-import { Button } from "@/components/ui/button";
+import { ChoosePlanButton, ContactAdminButton } from "./_components/PricingClientButtons";
+
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://pandharpurdarshan.com';
 
 export const metadata = {
-  title: "Pricing Plans",
-  robots: {
-    index: false,
-    follow: false,
+  title: "Pricing Plans | Pandharpur Darshan",
+  description: "View pricing plans to list your hotel, bhaktaniwas, travels, or restaurant on Pandharpur Darshan. Reach thousands of devotees directly.",
+  keywords: ["Pandharpur Darshan Pricing", "List Hotel in Pandharpur", "Promote Business Pandharpur", "Bhaktaniwas Listing"],
+  alternates: {
+    canonical: `${baseUrl}/pricing`,
+  },
+  openGraph: {
+    title: "Pricing Plans | Partner with Pandharpur Darshan",
+    description: "View pricing plans to list your business on Pandharpur Darshan and reach thousands of devotees.",
+    url: `${baseUrl}/pricing`,
+    type: "website",
   },
 };
 
@@ -96,9 +105,7 @@ export default function PricingPage() {
               </ul>
 
               <div className="mt-auto pt-6">
-                <Button className="w-full bg-orange-500 hover:bg-orange-600">
-                  Choose plan
-                </Button>
+                <ChoosePlanButton planName={plan.name} />
               </div>
             </div>
           ))}
@@ -120,9 +127,7 @@ export default function PricingPage() {
               </p>
             </div>
             <div className="md:text-right">
-              <Button variant="outline" className="border-orange-500 text-orange-600 hover:bg-orange-50">
-                Contact admin team
-              </Button>
+              <ContactAdminButton />
             </div>
           </div>
         </section>

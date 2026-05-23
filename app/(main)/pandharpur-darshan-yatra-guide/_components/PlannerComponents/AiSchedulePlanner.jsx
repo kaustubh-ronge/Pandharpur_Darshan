@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { toast } from "sonner";
 import { aiScheduleSchema } from '@/lib/schema';
 import { format } from "date-fns";
+import { useUser, SignInButton } from "@clerk/nextjs";
 
 /**
  * AiSchedulePlanner (Client Component)
@@ -34,6 +35,7 @@ function AiSchedulePlanner({
   z,
   generateAiSchedule
 }) {
+  const { isSignedIn } = useUser();
   const { fn: generate, loading, error } = useFetch(generateAiSchedule);
   const form = useForm({ resolver: zodResolver(aiScheduleSchema) });
 
@@ -66,7 +68,13 @@ function AiSchedulePlanner({
               />
             </PopoverContent></Popover><FormMessage /></FormItem>} />
             <FormField control={form.control} name="prompt" render={({ field }) => <FormItem><FormLabel>What do you need to schedule?</FormLabel><FormControl><Textarea placeholder="e.g., I need to visit the main temple for morning darshan, then go shopping for religious items, and have lunch at a good vegetarian restaurant." {...field} rows={3} /></FormControl><FormMessage /></FormItem>} />
-            <Button type="submit" disabled={loading} className="w-full">{loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</> : <><Clock4 className="mr-2 h-4 w-4" />Generate Schedule</>}</Button>
+            {isSignedIn ? (
+              <Button type="submit" disabled={loading} className="w-full">{loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</> : <><Clock4 className="mr-2 h-4 w-4" />Generate Schedule</>}</Button>
+            ) : (
+              <SignInButton mode="modal">
+                <Button type="button" className="w-full"><Clock4 className="mr-2 h-4 w-4" /> Login to Generate Schedule</Button>
+              </SignInButton>
+            )}
           </form>
         </Form>
         {loading && <div className="text-center pt-4"><Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" /></div>}

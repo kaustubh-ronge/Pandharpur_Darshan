@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useUser, SignInButton } from "@clerk/nextjs";
 import { createJoinUsInquiry } from "@/actions/joinUsActions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,14 +31,22 @@ const isMobileDevice = () => {
 };
 
 const JoinUsInquiryForm = ({ ownerWhatsAppNumber }) => {
+    const { isSignedIn, user } = useUser();
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [entityType, setEntityType] = useState("");
     const [message, setMessage] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    useEffect(() => {
+        if (isSignedIn && user) {
+            setName(user.fullName || "");
+        }
+    }, [isSignedIn, user]);
+
     const handleSubmit = async (event) => {
         event.preventDefault();
+        if (!isSignedIn) return;
 
         // --- Phone validation logic from previous step ---
         if (!name || !phone || !entityType || !message) {
@@ -163,10 +172,19 @@ const JoinUsInquiryForm = ({ ownerWhatsAppNumber }) => {
 
                     {/* Styled submit button */}
                     <motion.div variants={itemVariants}>
-                        <Button type="submit" disabled={isSubmitting} className="w-full group h-14 text-base font-bold rounded-lg text-white bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 hover:from-orange-600 hover:via-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-red-500/20">
-                            {isSubmitting ? "Submitting..." : "Send via WhatsApp"}
-                            <Send className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5" />
-                        </Button>
+                        {isSignedIn ? (
+                            <Button type="submit" disabled={isSubmitting} className="w-full group h-14 text-base font-bold rounded-lg text-white bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 hover:from-orange-600 hover:via-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-red-500/20">
+                                {isSubmitting ? "Submitting..." : "Send via WhatsApp"}
+                                <Send className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5" />
+                            </Button>
+                        ) : (
+                            <SignInButton mode="modal">
+                                <Button type="button" className="w-full group h-14 text-base font-bold rounded-lg text-white bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 hover:from-orange-600 hover:via-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-red-500/20">
+                                    Login to Send
+                                    <User className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5" />
+                                </Button>
+                            </SignInButton>
+                        )}
                     </motion.div>
                 </motion.form>
             </CardContent>
