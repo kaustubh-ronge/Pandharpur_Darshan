@@ -81,7 +81,7 @@ export default async function SingleHotelPage(props) {
         "itemListElement": [
             { "@type": "ListItem", "position": 1, "name": "Home", "item": baseUrl },
             { "@type": "ListItem", "position": 2, "name": "Bookings", "item": `${baseUrl}/pandharpur-bookings` },
-            { "@type": "ListItem", "position": 3, "name": "Hotels", "item": `${baseUrl}/pandharpur-bookings#hotels` },
+            { "@type": "ListItem", "position": 3, "name": "Hotels", "item": `${baseUrl}/pandharpur-bookings/hotels` },
             { "@type": "ListItem", "position": 4, "name": hotel.name, "item": url }
         ]
     };

@@ -83,7 +83,7 @@ export default async function SingleKirtankarPage(props) {
         "itemListElement": [
             { "@type": "ListItem", "position": 1, "name": "Home", "item": baseUrl },
             { "@type": "ListItem", "position": 2, "name": "Bookings", "item": `${baseUrl}/pandharpur-bookings` },
-            { "@type": "ListItem", "position": 3, "name": "Kirtankars", "item": `${baseUrl}/pandharpur-bookings#kirtankars` },
+            { "@type": "ListItem", "position": 3, "name": "Kirtankars", "item": `${baseUrl}/pandharpur-bookings/kirtankars` },
             { "@type": "ListItem", "position": 4, "name": kirtankar.name, "item": url }
         ]
     };

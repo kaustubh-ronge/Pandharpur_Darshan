@@ -83,7 +83,7 @@ export default async function SingleBhaktaniwasPage(props) {
         "itemListElement": [
             { "@type": "ListItem", "position": 1, "name": "Home", "item": baseUrl },
             { "@type": "ListItem", "position": 2, "name": "Bookings", "item": `${baseUrl}/pandharpur-bookings` },
-            { "@type": "ListItem", "position": 3, "name": "Bhaktaniwas", "item": `${baseUrl}/pandharpur-bookings#bhaktaniwas` },
+            { "@type": "ListItem", "position": 3, "name": "Bhaktaniwas", "item": `${baseUrl}/pandharpur-bookings/bhaktaniwas` },
             { "@type": "ListItem", "position": 4, "name": item.name, "item": url }
         ]
     };

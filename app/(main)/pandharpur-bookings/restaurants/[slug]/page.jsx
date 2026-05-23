@@ -83,7 +83,7 @@ export default async function SingleRestaurantPage(props) {
         "itemListElement": [
             { "@type": "ListItem", "position": 1, "name": "Home", "item": baseUrl },
             { "@type": "ListItem", "position": 2, "name": "Bookings", "item": `${baseUrl}/pandharpur-bookings` },
-            { "@type": "ListItem", "position": 3, "name": "Restaurants", "item": `${baseUrl}/pandharpur-bookings#restaurants` },
+            { "@type": "ListItem", "position": 3, "name": "Restaurants", "item": `${baseUrl}/pandharpur-bookings/restaurants` },
             { "@type": "ListItem", "position": 4, "name": restaurant.name, "item": url }
         ]
     };
