@@ -27,14 +27,6 @@ const organizationAndWebsiteSchema = {
       "inLanguage": ["en", "mr"],
       "publisher": {
         "@id": "https://pandharpurdarshan.com/#organization"
-      },
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": {
-          "@type": "EntryPoint",
-          "urlTemplate": "https://pandharpurdarshan.com/search?q={search_term_string}"
-        },
-        "query-input": "required name=search_term_string"
       }
     },
     {
@@ -102,19 +94,19 @@ const faqSchema = {
 };
 
 const Home = () => {
-    return (
-        <div>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationAndWebsiteSchema) }}
-            />
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-            />
-            <Hero />
-        </div>
-    )
+  return (
+    <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationAndWebsiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <Hero />
+    </div>
+  )
 }
 
 export default Home
