@@ -54,8 +54,7 @@ export default function TripPlannerPage({ GOOGLE_MAPS_API_KEY, ppur_attractions 
     setActiveDisplayTab('map');
   };
 
-  if (!isLoaded) return <div className="flex items-center justify-center h-screen bg-orange-50/50 dark:bg-slate-900"><Loader2 className="w-8 h-8 animate-spin text-orange-500" /></div>;
-  if (!user) return <div className="p-8 text-center text-muted-foreground">Please sign in to access the Trip Planner.</div>;
+  if (!isLoaded) return <div className="flex items-center justify-center h-[50vh]"><Loader2 className="w-8 h-8 animate-spin text-orange-500" /></div>;
 
   return (
     <div className="max-w-7xl mx-auto">

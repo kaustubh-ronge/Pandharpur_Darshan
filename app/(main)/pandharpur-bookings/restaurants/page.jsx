@@ -46,6 +46,18 @@ export default async function RestaurantsPage() {
         <Suspense fallback={<ListingSkeleton />}>
           <RestaurantList />
         </Suspense>
+
+        <article className="max-w-4xl mx-auto mt-16 text-lg text-slate-700 dark:text-slate-300 space-y-4 text-center bg-white/50 backdrop-blur-sm p-6 rounded-2xl shadow-sm border border-slate-100">
+          <p>
+            Because of its deep spiritual significance, Pandharpur is a predominantly vegetarian city. The area immediately surrounding the Shri Vitthal Rukmini Mandir strictly serves pure vegetarian food, ensuring that your spiritual fasts and dietary vows are fully respected. Non-vegetarian food is largely unavailable near the temple premises.
+          </p>
+          <p>
+            When dining here, you have the incredible opportunity to enjoy authentic, home-style Maharashtrian cuisine. Local favorites include piping hot <em>varan-bhaat</em> (dal and rice), <em>puran poli</em>, and the rich, creamy sweetness of <em>shrikhand</em>. For a quick snack between darshans, nothing beats a plate of fresh poha or upma.
+          </p>
+          <p>
+            In addition to local restaurants, do not miss the opportunity to partake in the temple <em>prasad</em>, which is considered a divine blessing. Browse our list below to find highly-rated, clean, and reliable vegetarian dining options that cater to pilgrims, families, and large travel groups.
+          </p>
+        </article>
       </div>
     </div>
   );

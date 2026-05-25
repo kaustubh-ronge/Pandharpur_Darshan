@@ -58,3 +58,6 @@ next-env.d.ts
 /lib/generated/prisma
 
 implementation_plan.md
+
+/seo-contexts
+/seo-contexts/*

@@ -18,7 +18,9 @@ export const metadata = {
         template: "%s | Pandharpur Darshan"
     },
     description: "Official guide for Pandharpur Darshan. Find information about Lord Vitthal temple timings, festivals, yatra guides, attractions, and local facilities.",
-    keywords: ["Pandharpur", "Vitthal", "Darshan", "Yatra", "Ekadashi", "Pandharpur Guide"],
+    twitter: {
+        card: 'summary_large_image',
+    },
     robots: {
         index: true,
         follow: true,
@@ -33,53 +35,12 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-    const organizationSchema = {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Pandharpur Darshan",
-        "url": "https://pandharpurdarshan.com",
-        "logo": "https://pandharpurdarshan.com/logo.png",
-        "description": "Official guide for Pandharpur Darshan. Find information about Lord Vitthal temple timings, festivals, and yatra guides.",
-        "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "Main Road, Near Vitthal Temple",
-            "addressLocality": "Pandharpur",
-            "addressRegion": "Maharashtra",
-            "postalCode": "413304",
-            "addressCountry": "IN"
-        },
-        "contactPoint": {
-            "@type": "ContactPoint",
-            "telephone": "+91-7498444684",
-            "contactType": "customer service"
-        }
-    };
 
-    const websiteSchema = {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Pandharpur Darshan",
-        "url": "https://pandharpurdarshan.com",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://pandharpurdarshan.com/search?q={search_term_string}",
-            "query-input": "required name=search_term_string"
-        }
-    };
 
     return (
         <ClerkProvider>
             <html lang="en" suppressHydrationWarning className={`${poppins.variable}`}>
-                <head>
-                    <script
-                        type="application/ld+json"
-                        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-                    />
-                    <script
-                        type="application/ld+json"
-                        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-                    />
-                </head>
+                <head />
                 <body className="font-poppins antialiased">
                     <main className="min-h-screen">{children}</main>
                     <SpeedInsights />

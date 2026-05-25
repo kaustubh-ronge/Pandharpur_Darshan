@@ -40,19 +40,19 @@ export const contactDetails = {
 export const socialLinks = [
   { name: "LinkedIn", href: "https://www.linkedin.com/company/vithai-software-solutions/", icon: <Linkedin size={20} /> },
   { name: "Instagram", href: "https://www.instagram.com/pandharpur__darshan", icon: <Instagram size={20} /> },
-  { name: "YouTube", href: "#", icon: <Youtube size={20} /> },
-  { name: "Facebook", href: "#", icon: <Facebook size={20} /> }, // Changed from Twitter to Facebook
+  // { name: "YouTube", href: "#", icon: <Youtube size={20} /> },
+  // { name: "Facebook", href: "#", icon: <Facebook size={20} /> },
 ];
 
 
 // Placeholder images for the gallery
 export const galleryImages = [
-  "/footerimages/vitthal-image.jpg",
-  "/footerimages/rukmini-image.jpg",
-  "/footerimages/ppur-temple.jpg",
-  "/footerimages/ppur-temple-2.jpg",
-  "/footerimages/temple-5.jpeg",
-  "/footerimages/ppur-temple-4.jpg",
+  { src: "/footerimages/vitthal-image.jpg", alt: "Lord Vitthal idol Pandharpur darshan" },
+  { src: "/footerimages/rukmini-image.jpg", alt: "Mata Rukmini idol Pandharpur temple" },
+  { src: "/footerimages/ppur-temple.jpg", alt: "Pandharpur Vitthal Mandir temple exterior" },
+  { src: "/footerimages/ppur-temple-2.jpg", alt: "Pandharpur temple darshan queue" },
+  { src: "/footerimages/temple-5.jpeg", alt: "Pandharpur pilgrimage temple view" },
+  { src: "/footerimages/ppur-temple-4.jpg", alt: "Pandharpur Wari yatra temple procession" },
 ];
 
 export const footerBottomLinks = [

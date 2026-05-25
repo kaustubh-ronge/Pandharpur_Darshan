@@ -103,8 +103,13 @@ export default function StaticHelpAboutPage() {
                 </div>
                 Our Story & Mission
               </CardTitle>
-              <CardDescription className="text-base pt-2 text-slate-700">
-                We are a passionate team with deep roots in Pandharpur, dedicated to making your pilgrimage experience seamless and memorable. Our platform was born from a desire to solve a real-world problem: the difficulty of finding consolidated and reliable information for planning a trip to this sacred town. Combining our expertise in technology with our love for our culture, we built a comprehensive platform to serve pilgrims and visitors.
+              <CardDescription className="text-base pt-4 text-slate-700 space-y-3">
+                <p>
+                  <strong>PandharpurDarshan.com</strong> is proudly built and maintained by <strong>Vithai Software Solutions</strong>, a dedicated technology team based in Pandharpur, Maharashtra. Founded with the vision of bridging the gap between spirituality and technology, our mission is to help millions of pilgrims seamlessly plan their Pandharpur darshan.
+                </p>
+                <p>
+                  We recognized the difficulties devotees face in finding reliable information about temple timings, trusted accommodations, and local travel. By combining our deep local expertise with modern digital solutions, we provide a transparent, easy-to-use platform that connects pilgrims directly with local businesses without any hidden commissions.
+                </p>
               </CardDescription>
             </CardHeader>
             <CardContent>

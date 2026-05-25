@@ -46,10 +46,22 @@ export default async function TravelPage() {
           title="Travel &amp; Transport in Pandharpur"
           subtitle="Find information on how to reach Pandharpur and get around the city, from bus services to local rickshaws."
         />
-        
+
         <Suspense fallback={<ListingSkeleton />}>
           <TravelList />
         </Suspense>
+
+        <article className="max-w-4xl mx-auto mt-16 text-lg text-slate-700 dark:text-slate-300 space-y-4 text-center bg-white/50 backdrop-blur-sm p-6 rounded-2xl shadow-sm border border-slate-100">
+          <p>
+            Getting to Pandharpur is highly convenient from across Maharashtra. The city is well-connected by road and rail networks. Most pilgrims arrive via the Pandharpur Railway Station (PVR), which runs special trains from Pune, Mumbai, and Solapur during major festivals. If you prefer traveling by road, MSRTC (ST buses) and private tourist buses operate frequent services from all major hubs.
+          </p>
+          <p>
+            For those driving, Pandharpur is approximately 250 kilometers from Pune, 75 kilometers from Solapur, and 180 kilometers from Kolhapur. The highways leading into the city are well-maintained, ensuring a smooth drive for families and tour groups alike.
+          </p>
+          <p>
+            Once inside the city, navigating is primarily done through auto-rickshaws and shared jeeps. Many of the core temple areas and narrow lanes around the Chandrabhaga River are best explored on foot. Below, you will find a curated list of trusted local travel operators and intercity transport services to help you plan a seamless journey.
+          </p>
+        </article>
       </div>
     </div>
   );

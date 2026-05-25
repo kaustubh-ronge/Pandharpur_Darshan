@@ -9,9 +9,9 @@ import { useState, useEffect } from "react";
 
 // Static data for the slider
 const sliderImages = [
-    "/mandirpandharpur.jpg",
-    "/pandharpurmandir2.webp",
-    "/pandharpurtemple1.jpg",
+    { src: "/mandirpandharpur.jpg", alt: "Shri Vitthal Rukmini Mandir front view, Pandharpur" },
+    { src: "/pandharpurmandir2.webp", alt: "Vitthal Rukmini Mandir temple entrance, Pandharpur Maharashtra" },
+    { src: "/pandharpurtemple1.jpg", alt: "Pandharpur temple Chandrabhaga river view" },
 ];
 
 export default function HeroSection() {
@@ -81,8 +81,8 @@ export default function HeroSection() {
                                     <Card className="overflow-hidden rounded-xl shadow-lg">
                                         <CardContent className="relative flex aspect-video items-center justify-center p-0">
                                             <Image
-                                                src={image}
-                                                alt={`Temple image ${index + 1}`}
+                                                src={image.src}
+                                                alt={image.alt}
                                                 fill
                                                 style={{ objectFit: 'cover' }}
                                                 priority={index === 0}

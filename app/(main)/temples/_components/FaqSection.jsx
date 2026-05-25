@@ -49,17 +49,16 @@ export default function FaqSection() {
                                 <span>{faq.question}</span>
                                 <ChevronDown className={`transition-transform duration-300 ${openIndex === index ? "rotate-180" : ""}`} />
                             </button>
-                            {openIndex === index && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="px-6 pb-4 text-gray-700 bg-white border-t border-gray-200"
-                                >
+                            <motion.div
+                                initial={false}
+                                animate={{ height: openIndex === index ? 'auto' : 0, opacity: openIndex === index ? 1 : 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="overflow-hidden"
+                            >
+                                <div className="px-6 pb-4 text-gray-700 bg-white border-t border-gray-200">
                                     {faq.answer}
-                                </motion.div>
-                            )}
+                                </div>
+                            </motion.div>
                         </div>
                     ))}
                 </div>

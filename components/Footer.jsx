@@ -118,11 +118,11 @@ const Footer = () => {
 
             {/* Add mt-2 (margin-top) here to push the grid down */}
             <div className="grid grid-cols-3 gap-2 mt-2">
-              {galleryImages.map((src, index) => (
+              {galleryImages.map((image, index) => (
                 <div key={index} className="aspect-square overflow-hidden rounded">
                   <Image
-                    src={src}
-                    alt={`Gallery image ${index + 1}`}
+                    src={image.src}
+                    alt={image.alt}
                     width={100}
                     height={100}
                     className="w-full h-full object-cover object-center transform transition-transform duration-300 hover:scale-110"
