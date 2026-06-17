@@ -24,7 +24,7 @@ import {
 } from '@/sanity/lib/queries';
 
 const google = createGoogleGenerativeAI({
-  apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
 });
 
 const BIG_SYSTEM_PROMPT = `
