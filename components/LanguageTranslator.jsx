@@ -2,10 +2,9 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { detectDeviceLanguage, getCookie } from '@/lib/languageUtils';
 
 const GoogleTranslateManager = () => {
-    // --- THIS IS THE STRONGER COOKIE IMPLEMENTATION YOU REQUESTED ---
-
     // A helper function to forcefully delete cookies by trying all common variations.
     const deleteCookie = (name) => {
         const domain = window.location.hostname;
@@ -21,24 +20,45 @@ const GoogleTranslateManager = () => {
     const changeLanguage = (langCode) => {
         // Step 1: Forcefully delete any old 'googtrans' cookie to prevent conflicts.
         deleteCookie('googtrans');
+        try {
+            localStorage.setItem('pandharpur_lang_pref_set', 'true');
+        } catch (_) {}
 
         // Step 2: After a short delay, set the new cookie using multiple methods for reliability.
         setTimeout(() => {
-            // Method A (Old, more specific): Sets the cookie with the exact hostname.
-            document.cookie = `googtrans=/en/${langCode};path=/;domain=${window.location.hostname};`;
-            
-            // Method B (New, more general): Sets the cookie without the domain.
-            document.cookie = `googtrans=/en/${langCode};path=/;`;
+            if (langCode && langCode !== 'en') {
+                // Method A (Old, more specific): Sets the cookie with the exact hostname.
+                document.cookie = `googtrans=/en/${langCode};path=/;domain=${window.location.hostname};`;
+                
+                // Method B (New, more general): Sets the cookie without the domain.
+                document.cookie = `googtrans=/en/${langCode};path=/;`;
+            }
             
             // Step 3: Reload the page to apply the translation.
             window.location.reload();
         }, 100);
     };
 
-
     useEffect(() => {
         // Expose the changeLanguage function to the global window object
         window.changeGoogleTranslateLanguage = changeLanguage;
+
+        // --- FIRST VISIT DEVICE DEFAULT LANGUAGE INITIALIZATION ---
+        try {
+            const hasPrefSet = localStorage.getItem('pandharpur_lang_pref_set');
+            const existingCookie = getCookie('googtrans');
+
+            if (!hasPrefSet && !existingCookie) {
+                localStorage.setItem('pandharpur_lang_pref_set', 'true');
+                const deviceLangCode = detectDeviceLanguage();
+                if (deviceLangCode && deviceLangCode !== 'en') {
+                    document.cookie = `googtrans=/en/${deviceLangCode};path=/;domain=${window.location.hostname};`;
+                    document.cookie = `googtrans=/en/${deviceLangCode};path=/;`;
+                }
+            }
+        } catch (e) {
+            console.error('Error detecting device language:', e);
+        }
 
         // --- YOUR EXISTING CSS AND JS LOGIC TO HIDE THE BANNER ---
         const styleId = 'google-translate-banner-fix';
