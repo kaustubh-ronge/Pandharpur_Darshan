@@ -18,6 +18,11 @@ export const metadata = {
         template: "%s | Pandharpur Darshan"
     },
     description: "Official guide for Pandharpur Darshan. Find information about Lord Vitthal temple timings, festivals, yatra guides, attractions, and local facilities.",
+    icons: {
+        icon: '/pandharpur-darshan-logo.jpeg',
+        shortcut: '/pandharpur-darshan-logo.jpeg',
+        apple: '/pandharpur-darshan-logo.jpeg',
+    },
     twitter: {
         card: 'summary_large_image',
     },
@@ -40,7 +45,10 @@ export default function RootLayout({ children }) {
     return (
         <ClerkProvider>
             <html lang="en" suppressHydrationWarning className={`${poppins.variable}`}>
-                <head />
+                <head>
+                    <link rel="icon" href="/pandharpur-darshan-logo.jpeg" type="image/jpeg" />
+                    <link rel="apple-touch-icon" href="/pandharpur-darshan-logo.jpeg" />
+                </head>
                 <body className="font-poppins antialiased">
                     <main className="min-h-screen">{children}</main>
                     <SpeedInsights />

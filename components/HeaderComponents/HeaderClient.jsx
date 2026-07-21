@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -17,32 +17,41 @@ import {
     SheetHeader, SheetTitle, SheetDescription
 } from "@/components/ui/sheet"
 import { navItems, quickLinks } from "@/data/HeaderData/headerData"
-
-// Define the languages and their codes for the translator
-const supportedLanguages = [
-    { name: "English", code: "en" },
-    { name: "हिंदी", code: "hi" },
-    { name: "मराठी", code: "mr" },
-    { name: "ಕನ್ನಡ", code: "kn" }
-];
+import { supportedLanguages, getCurrentLanguageCode, getLanguageByCode } from "@/lib/languageUtils"
 
 export function HeaderClient({ user }) {
     const pathname = usePathname()
-    const [selectedLang, setSelectedLang] = useState("English")
+    const [selectedLang, setSelectedLang] = useState(supportedLanguages[0])
+
+    useEffect(() => {
+        const code = getCurrentLanguageCode();
+        const langObj = getLanguageByCode(code);
+        setSelectedLang(langObj);
+    }, []);
 
     // This function calls the global function from our GoogleTranslateManager
-    const handleLanguageChange = (langName, langCode) => {
-        setSelectedLang(langName);
+    const handleLanguageChange = (langObj) => {
+        setSelectedLang(langObj);
         if (window.changeGoogleTranslateLanguage) {
-            window.changeGoogleTranslateLanguage(langCode);
+            window.changeGoogleTranslateLanguage(langObj.code);
         }
     };
 
     return (
         <header className="fixed top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md shadow-sm md:pb-1">
             <div className="w-full max-w-screen-2xl mx-auto flex h-20 items-center justify-between px-3 sm:px-5 lg:px-8">
-                <Link href="/" className="flex-shrink-0">
-                    <Image src={'/hero-logo-1.png'} height={200} width={320} className=" lg:w-full ml-[-100px] md:h-[100%] md:ml-[-30px] md:w-full" alt="Pandharpur Darshan - Official Yatra Guide" priority />                </Link>
+                <Link href="/" className="flex items-center flex-shrink-0 group">
+                    <div className="relative flex items-center justify-center rounded-full p-1 bg-white border-2 border-orange-500 shadow-sm group-hover:border-orange-600 group-hover:shadow-orange-500/20 transition-all duration-300">
+                        <Image
+                            src="/pandharpur-darshan-logo.jpeg"
+                            alt="Pandharpur Darshan"
+                            width={64}
+                            height={64}
+                            className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover"
+                            priority
+                        />
+                    </div>
+                </Link>
 
                 <nav className="hidden lg:flex items-center gap-6 mx-auto">
                     {navItems.map((item) => (
@@ -82,21 +91,22 @@ export function HeaderClient({ user }) {
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                        {/* This dropdown now correctly controls the Google Translator */}
+                        {/* This dropdown controls the Google Translator without modifying language dropdown labels */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="gap-1 text-gray-700 hover:bg-gray-100">
+                                <Button variant="ghost" size="sm" className="gap-1 text-gray-700 hover:bg-gray-100 notranslate" translate="no">
                                     <Languages className="h-4 w-4" />
-                                    <span>{selectedLang}</span>
+                                    <span className="notranslate" translate="no">{selectedLang.label}</span>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" className="notranslate" translate="no">
                                 {supportedLanguages.map((lang) => (
                                     <DropdownMenuItem
                                         key={lang.code}
-                                        onClick={() => handleLanguageChange(lang.name, lang.code)}
+                                        className="notranslate"
+                                        onClick={() => handleLanguageChange(lang)}
                                     >
-                                        {lang.name}
+                                        <span className="notranslate" translate="no">{lang.label}</span>
                                     </DropdownMenuItem>
                                 ))}
                             </DropdownMenuContent>
@@ -201,22 +211,24 @@ export function HeaderClient({ user }) {
                                             <DropdownMenuTrigger asChild>
                                                 <Button
                                                     variant="ghost"
-                                                    className="w-full justify-between items-center px-3 py-2 text-gray-600 hover:bg-gray-100"
+                                                    className="w-full justify-between items-center px-3 py-2 text-gray-600 hover:bg-gray-100 notranslate"
+                                                    translate="no"
                                                 >
-                                                    <span className="flex items-center gap-3">
+                                                    <span className="flex items-center gap-3 notranslate" translate="no">
                                                         <Languages className="h-4 w-4" />
-                                                        {selectedLang}
+                                                        <span className="notranslate" translate="no">{selectedLang.label}</span>
                                                     </span>
                                                     <ChevronDown className="h-4 w-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent className="w-[260px]">
+                                            <DropdownMenuContent className="w-[260px] notranslate" translate="no">
                                                 {supportedLanguages.map((lang) => (
                                                     <DropdownMenuItem
                                                         key={lang.code}
-                                                        onClick={() => handleLanguageChange(lang.name, lang.code)}
+                                                        className="notranslate"
+                                                        onClick={() => handleLanguageChange(lang)}
                                                     >
-                                                        {lang.name}
+                                                        <span className="notranslate" translate="no">{lang.label}</span>
                                                     </DropdownMenuItem>
                                                 ))}
                                             </DropdownMenuContent>
