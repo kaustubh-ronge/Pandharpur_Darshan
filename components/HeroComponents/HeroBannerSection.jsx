@@ -1,13 +1,13 @@
 
 "use client";
 import React from "react";
-import Image from 'next/image'; // Import the Next.js Image component
+import Image from 'next/image';
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, PlayCircle, MapPin, Landmark, ArrowDown, Ticket } from "lucide-react";
+import { PlayCircle, MapPin, ArrowDown, Ticket } from "lucide-react";
 import Link from "next/link";
+import BookingSlider from "./BookingSlider";
 
 const HeroBannerSection = () => {
   return (
@@ -170,27 +170,9 @@ const HeroBannerSection = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.6, duration: 0.8 }}
-          className="grid md:grid-cols-2 gap-6 max-w-4xl w-full"
+          className="w-full max-w-4xl"
         >
-          <Card className="bg-white/80 backdrop-blur-md border border-orange-200 shadow-lg">
-            <CardContent className="flex items-center gap-4 p-6">
-              <Landmark className="h-8 w-8 text-orange-500" />
-              <div>
-                <h3 className="text-lg font-semibold">10M+ Pilgrims</h3>
-                <p className="text-sm text-gray-600">Experience India's largest spiritual walk.</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/80 backdrop-blur-md border border-orange-200 shadow-lg">
-            <CardContent className="flex items-center gap-4 p-6">
-              <Star className="h-8 w-8 text-orange-500" />
-              <div>
-                <h3 className="text-lg font-semibold">Rich Heritage</h3>
-                <p className="text-sm text-gray-600">A journey through timeless devotion and culture.</p>
-              </div>
-            </CardContent>
-          </Card>
+          <BookingSlider />
         </motion.div>
 
         <motion.div
